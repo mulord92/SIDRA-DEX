@@ -1,0 +1,6 @@
+{
+  "name": "SIDRA SWAP WATCH",
+  "description": "Live Prices, Token Analytics, and Market Insights Dashboard for SidraChain Tokens",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
