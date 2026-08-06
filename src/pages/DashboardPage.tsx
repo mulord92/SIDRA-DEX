@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Token, MarketGlobalStats } from '../types/index';
 import { DemoDataBadge } from '../components/DemoDataBadge';
 import { TokenLogo } from '../components/TokenLogo';
+import { DashboardPriceChart } from '../components/DashboardPriceChart';
 import { TrendingUp, TrendingDown, RefreshCw, Search, ArrowUpRight, ArrowDownRight, Layers, DollarSign, Activity, Droplets, Sparkles, Radio } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
@@ -162,6 +163,9 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Real-time Price History Chart Component */}
+      <DashboardPriceChart tokens={tokens} />
 
       {/* Main Grid: Top Movers & Search / Recently Updated */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -39,13 +39,15 @@ export const TokenLogo: React.FC<TokenLogoProps> = ({ token, size = 'md', classN
   };
 
   const cleanSym = symbol.toLowerCase().replace(/[^a-z0-9]/g, '');
-  const sources = [
+  const sources = Array.from(new Set([
     token?.logoUrl,
     `/tokens/${cleanSym}.png`,
+    `/tokens/${symbol.toLowerCase()}.png`,
     `https://masatos007.github.io/SidraDEX-Live-Prices/img/${cleanSym}.png`,
     `https://masatos007.github.io/SidraDEX-Live-Prices/img/${symbol.toLowerCase()}.png`,
+    `/tokens/default.png`,
     `https://api.dicebear.com/7.x/identicon/svg?seed=${symbol}&backgroundColor=121417`
-  ].filter(Boolean) as string[];
+  ].filter(Boolean))) as string[];
 
   const currentSrc = sources[attempt];
 

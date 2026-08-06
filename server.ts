@@ -48,8 +48,7 @@ function verifyAdminAuth(req: express.Request, res: express.Response, next: expr
   }
 
   const token = authHeader.split(' ')[1];
-  const validSecrets = [adminSecret, 'sidradmin2026', 'admin123'].filter(Boolean);
-  if (!validSecrets.includes(token)) {
+  if (token !== adminSecret) {
     res.status(403).json({ error: 'Forbidden: Invalid admin credential passcode.' });
     return;
   }
@@ -289,13 +288,12 @@ app.delete('/api/alerts/:id', (req, res) => {
 app.post('/api/admin/login', (req, res) => {
   const { passcode } = req.body;
   const adminSecret = process.env.ADMIN_SECRET_KEY || 'sidradmin2026';
-  const validSecrets = [adminSecret, 'sidradmin2026', 'admin123'].filter(Boolean);
 
-  if (validSecrets.includes(passcode)) {
+  if (passcode === adminSecret) {
     providerManager.addAuditLog('ADMIN_LOGIN', 'Administrator authenticated successfully.', 'Admin');
     res.json({
       success: true,
-      token: passcode,
+      token: adminSecret,
       message: 'Authentication successful'
     });
   } else {
@@ -324,11 +322,11 @@ app.put('/api/admin/tokens/:symbol', verifyAdminAuth, async (req, res) => {
   }
 });
 
-// Update verification status handler
-const handleStatusUpdate = async (req: express.Request, res: express.Response) => {
+// Update verification status
+app.post('/api/admin/tokens/:symbol/verify', verifyAdminAuth, async (req, res) => {
   try {
     const { symbol } = req.params;
-    const status = req.body.status || req.body.verificationStatus;
+    const { status } = req.body;
 
     if (!['Verified', 'Unverified', 'Pending Review', 'Data Unavailable'].includes(status)) {
       res.status(400).json({ error: 'Invalid verification status value' });
@@ -345,30 +343,22 @@ const handleStatusUpdate = async (req: express.Request, res: express.Response) =
   } catch (error) {
     res.status(500).json({ error: 'Failed to update token verification status' });
   }
-};
-
-app.post('/api/admin/tokens/:symbol/verify', verifyAdminAuth, handleStatusUpdate);
-app.patch('/api/admin/tokens/:symbol/status', verifyAdminAuth, handleStatusUpdate);
-app.post('/api/admin/tokens/:symbol/status', verifyAdminAuth, handleStatusUpdate);
+});
 
 // Disable / Enable Token Feed
-const handleToggleFeed = async (req: express.Request, res: express.Response) => {
+app.post('/api/admin/tokens/:symbol/toggle-feed', verifyAdminAuth, async (req, res) => {
   try {
     const { symbol } = req.params;
-    const disabled = req.body.disabled ?? req.body.isDisabled ?? false;
+    const { disabled } = req.body;
 
     const updated = await providerManager.toggleTokenFeed(symbol, Boolean(disabled), 'Admin');
     res.json(updated);
   } catch (error) {
     res.status(500).json({ error: 'Failed to toggle token feed' });
   }
-};
+});
 
-app.post('/api/admin/tokens/:symbol/toggle-feed', verifyAdminAuth, handleToggleFeed);
-app.post('/api/admin/tokens/:symbol/toggle-disable', verifyAdminAuth, handleToggleFeed);
-app.patch('/api/admin/tokens/:symbol/toggle-feed', verifyAdminAuth, handleToggleFeed);
-
-// Set / Get Provider
+// Set Provider
 app.get('/api/admin/provider', verifyAdminAuth, (req, res) => {
   res.json({
     activeProvider: providerManager.getActiveProviderType(),
@@ -377,7 +367,7 @@ app.get('/api/admin/provider', verifyAdminAuth, (req, res) => {
 });
 
 app.post('/api/admin/provider', verifyAdminAuth, (req, res) => {
-  const providerType = req.body.providerType || req.body.providerKey;
+  const { providerType } = req.body;
   if (!['demo', 'official', 'indexer', 'sidradex_web'].includes(providerType)) {
     res.status(400).json({ error: 'Invalid provider type' });
     return;
@@ -391,8 +381,8 @@ app.post('/api/admin/provider', verifyAdminAuth, (req, res) => {
   });
 });
 
-// Audit Logs (support both /api/admin/logs and /api/admin/audit-logs)
-app.get(['/api/admin/logs', '/api/admin/audit-logs'], verifyAdminAuth, (req, res) => {
+// Audit Logs
+app.get('/api/admin/logs', verifyAdminAuth, (req, res) => {
   res.json(providerManager.getAuditLogs());
 });
 
