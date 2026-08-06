@@ -48,6 +48,7 @@ export interface Token {
   volume24hUsd: number;
   liquidityUsd: number;
   holdersCount: number;
+  transfersCount?: number;
   verificationStatus: VerificationStatus;
   contractAddress: string;
   network: string;

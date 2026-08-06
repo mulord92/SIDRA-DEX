@@ -96,9 +96,15 @@ app.get('/api/tokens', async (req, res) => {
       );
     }
 
-    // Filter by verification status
+    // Filter by verification status or Gainers / Losers
     if (status && typeof status === 'string' && status !== 'All') {
-      tokens = tokens.filter(t => t.verificationStatus.toLowerCase() === status.toLowerCase());
+      if (status === 'Gainers') {
+        tokens = tokens.filter(t => t.change24h > 0);
+      } else if (status === 'Losers') {
+        tokens = tokens.filter(t => t.change24h < 0);
+      } else {
+        tokens = tokens.filter(t => t.verificationStatus.toLowerCase() === status.toLowerCase());
+      }
     }
 
     // Sorting

@@ -168,7 +168,7 @@ export const AlertsPage: React.FC = () => {
                   type="text"
                   value={symbol}
                   onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                  placeholder="FBAY, HPDA, GPC, RIDEX..."
+                  placeholder="FBAY, GPC, RIDEX..."
                   className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl px-3 py-2 text-[#e0e2e6] font-mono focus:border-[#f2ca50] outline-none"
                   required
                 />

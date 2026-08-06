@@ -175,7 +175,7 @@ export const ScannerPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-gray-400">Unit Price</p>
-                  <p className="font-semibold text-[#f2ca50] font-mono mt-0.5">${result.priceUsd.toFixed(2)}</p>
+                  <p className="font-semibold text-[#f2ca50] font-mono mt-0.5">{result.priceSda.toFixed(result.priceSda < 0.0001 ? 6 : 4)} SDA</p>
                 </div>
               </div>
             </div>
@@ -233,7 +233,7 @@ export const ScannerPage: React.FC = () => {
                 <span>Total Liquidity</span>
               </div>
               <div className="mt-4">
-                <p className="text-2xl font-extrabold text-[#e0e2e6] font-mono">${(result.liquidityUsd / 1000000).toFixed(1)}M</p>
+                <p className="text-2xl font-extrabold text-[#e0e2e6] font-mono">{(result.liquidityUsd / 1000).toFixed(1)}K SDA</p>
                 <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
                   <Lock className="w-3 h-3 text-emerald-400" /> 98% Locked
                 </p>

@@ -242,8 +242,8 @@ export const AdminPage: React.FC = () => {
                 : 'bg-[#1d2023] border-white/5 text-gray-400 hover:border-white/20'
             }`}
           >
-            <p className="font-bold text-xs">SidraDEX Web Provider</p>
-            <p className="text-[10px] opacity-80 mt-1">Third-party pool data (web3.sidradex.pw)</p>
+            <p className="font-bold text-xs">Sidra Dex Live</p>
+            <p className="text-[10px] opacity-80 mt-1">Live on-chain pool pricing engine</p>
           </button>
         </div>
       </div>

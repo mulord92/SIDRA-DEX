@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Token, PricePoint } from '../types/index';
 import { DemoDataBadge } from '../components/DemoDataBadge';
+import { TokenLogo } from '../components/TokenLogo';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
 import { Copy, Check, ExternalLink, ShieldCheck, RefreshCw, BarChart2, Users, Database } from 'lucide-react';
 
@@ -84,9 +85,7 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
       <div className="glass-panel rounded-2xl p-6 relative overflow-hidden">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-[#1d2023] border border-white/10 flex items-center justify-center font-bold text-lg text-[#f2ca50] shrink-0">
-              {token.symbol.slice(0, 2)}
-            </div>
+            <TokenLogo token={token} size="xl" />
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold text-[#e0e2e6] font-['Outfit']">
@@ -122,10 +121,10 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
           {/* Pricing Banner */}
           <div className="text-left md:text-right">
             <div className="text-2xl md:text-3xl font-extrabold text-[#e0e2e6] font-mono">
-              {token.priceSda.toFixed(token.priceSda < 0.1 ? 4 : 2)} <span className="text-sm text-[#f2ca50]">SDA</span>
+              {token.priceSda.toFixed(token.priceSda < 0.0001 ? 6 : token.priceSda < 0.1 ? 4 : 2)} <span className="text-sm text-[#f2ca50]">SDA</span>
             </div>
             <div className="flex items-center md:justify-end gap-2 text-xs font-semibold mt-1">
-              <span className="text-gray-400 font-mono">~${token.priceUsd.toFixed(2)} USD</span>
+              <span className="text-gray-400 font-mono">Native SidraChain Rate</span>
               <span className={token.change24h >= 0 ? 'text-emerald-400' : 'text-red-400'}>
                 {token.change24h >= 0 ? `+${token.change24h}%` : `${token.change24h}%`}
               </span>
@@ -203,7 +202,7 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
         <div className="glass-panel rounded-2xl p-4">
           <p className="text-[11px] font-semibold text-[#d0c5af] uppercase">Est. Market Cap</p>
           <p className="text-xl font-extrabold text-[#e0e2e6] font-mono mt-1">
-            {token.marketCapUsd ? `$${(token.marketCapUsd / 1000000).toFixed(1)}M` : 'Estimated'}
+            {token.marketCapUsd ? `${(token.marketCapUsd / 1000).toFixed(1)}K SDA` : 'Estimated'}
           </p>
           <span className="text-[10px] text-gray-500">Based on circulating supply</span>
         </div>
@@ -212,7 +211,7 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
         <div className="glass-panel rounded-2xl p-4">
           <p className="text-[11px] font-semibold text-[#d0c5af] uppercase">Fully Diluted Val.</p>
           <p className="text-xl font-extrabold text-[#e0e2e6] font-mono mt-1">
-            {token.fdvUsd ? `$${(token.fdvUsd / 1000000).toFixed(1)}M` : 'N/A'}
+            {token.fdvUsd ? `${(token.fdvUsd / 1000).toFixed(1)}K SDA` : 'N/A'}
           </p>
           <span className="text-[10px] text-gray-500">Max valuation at full supply</span>
         </div>
@@ -255,7 +254,7 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
             <div className="flex justify-between items-center">
               <span>Data Source:</span>
               <span className="font-semibold text-[#f2ca50]">
-                {token.dataSource.includes('SidraDEX Web') ? `Source: ${token.dataSource}` : token.dataSource}
+                {token.dataSource ? token.dataSource.replace(/\s*\(.*?\)/g, '') : 'Sidra Dex Live'}
               </span>
             </div>
             {token.poolId && (
@@ -280,9 +279,15 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
               <span>Holders:</span>
               <span className="font-mono text-[#e0e2e6]">{token.holdersCount.toLocaleString()}</span>
             </div>
+            {token.transfersCount !== undefined && (
+              <div className="flex justify-between items-center">
+                <span>Total Transfers:</span>
+                <span className="font-mono text-[#f2ca50] font-semibold">{token.transfersCount.toLocaleString()}</span>
+              </div>
+            )}
             <div className="flex justify-between items-center">
               <span>Liquidity Depth:</span>
-              <span className="font-mono text-[#e0e2e6]">${(token.liquidityUsd / 1000000).toFixed(2)}M</span>
+              <span className="font-mono text-[#e0e2e6]">{(token.liquidityUsd / 1000).toFixed(1)}K SDA</span>
             </div>
           </div>
         </div>
@@ -298,7 +303,7 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
                   <tr className="border-b border-white/10 text-[11px] text-[#d0c5af] uppercase">
                     <th className="py-2.5 px-3">Type</th>
                     <th className="py-2.5 px-3 text-right">Amount (SDA)</th>
-                    <th className="py-2.5 px-3 text-right">Est. USD</th>
+                    <th className="py-2.5 px-3 text-right">Rate</th>
                     <th className="py-2.5 px-3">Tx Hash</th>
                     <th className="py-2.5 px-3 text-right">Time</th>
                   </tr>
@@ -314,7 +319,7 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
                         </span>
                       </td>
                       <td className="py-3 px-3 text-right font-mono font-bold">{tx.amountSda} SDA</td>
-                      <td className="py-3 px-3 text-right font-mono text-[#d0c5af]">${tx.usdValue}</td>
+                      <td className="py-3 px-3 text-right font-mono text-[#d0c5af]">{tx.amountSda} SDA</td>
                       <td className="py-3 px-3 font-mono text-gray-400">{tx.txHash}</td>
                       <td className="py-3 px-3 text-right text-gray-400">{tx.timestamp}</td>
                     </tr>

@@ -57,46 +57,7 @@ export class DemoDataProvider implements IDataProvider {
         }
       ]
     },
-    {
-      id: 'token-hpda',
-      rank: 2,
-      name: 'HEROPANDA',
-      symbol: 'HPDA',
-      logoUrl: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=100&auto=format&fit=crop&q=80',
-      priceSda: 18.90,
-      priceUsd: 5.58,
-      change24h: 8.7,
-      volume24hSda: 850000,
-      volume24hUsd: 2507500,
-      liquidityUsd: 2100000,
-      holdersCount: 5210,
-      verificationStatus: 'Verified',
-      contractAddress: '0x8b12c49a01f92e3a10842e91129b83c182df3910',
-      network: 'SidraChain Mainnet',
-      isDemoData: true,
-      dataSource: 'Demo Data',
-      lastUpdated: new Date().toISOString(),
-      totalSupply: 50000000,
-      circulatingSupply: 32000000,
-      marketCapUsd: 178560000,
-      fdvUsd: 279000000,
-      description: 'HEROPANDA (HPDA) is a community token and liquidity protocol on SidraChain ecosystem dApps.',
-      websiteUrl: 'https://heropanda.demo.sidraswap',
-      explorerUrl: 'https://ledger.sidrachain.com/token/0x8b12c49a01f92e3a10842e91129b83c182df3910',
-      recentTransactions: [
-        {
-          id: 'tx-3',
-          type: 'Buy',
-          amountSda: 3200,
-          amountToken: 169.31,
-          usdValue: 944.7,
-          txHash: '0x12a0...73ef',
-          timestamp: '8 mins ago',
-          fromAddress: '0x889...102a',
-          toAddress: '0x8b1...3910'
-        }
-      ]
-    },
+
     {
       id: 'token-sxd',
       rank: 3,

@@ -4,7 +4,7 @@ import { DemoDataBadge } from '../components/DemoDataBadge';
 import { Eye, Trash2, Bell, ExternalLink, Plus, Search } from 'lucide-react';
 
 export const WatchlistPage: React.FC = () => {
-  const [watchlistSymbols, setWatchlistSymbols] = useState<string[]>(['FBAY', 'HPDA', 'SXD']);
+  const [watchlistSymbols, setWatchlistSymbols] = useState<string[]>(['FBAY', 'RIDEX', 'SXD']);
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState(true);
   const [addSymbolInput, setAddSymbolInput] = useState('');
@@ -112,9 +112,9 @@ export const WatchlistPage: React.FC = () => {
                 <tr className="border-b border-white/10 bg-black/30 text-[11px] font-semibold text-[#d0c5af] uppercase">
                   <th className="py-3.5 px-6">Asset</th>
                   <th className="py-3.5 px-6 text-right">Price (SDA)</th>
-                  <th className="py-3.5 px-6 text-right">Est. USD</th>
+                  <th className="py-3.5 px-6 text-right">Holders</th>
                   <th className="py-3.5 px-6 text-right">24h %</th>
-                  <th className="py-3.5 px-6 text-right">Liquidity</th>
+                  <th className="py-3.5 px-6 text-right">Liquidity (SDA)</th>
                   <th className="py-3.5 px-6">Status</th>
                   <th className="py-3.5 px-6 text-right">Actions</th>
                 </tr>
@@ -137,11 +137,11 @@ export const WatchlistPage: React.FC = () => {
                     </td>
 
                     <td className="py-4 px-6 text-right font-bold">
-                      {token.priceSda.toFixed(2)} SDA
+                      {token.priceSda.toFixed(token.priceSda < 0.0001 ? 6 : 4)} SDA
                     </td>
 
                     <td className="py-4 px-6 text-right text-[#d0c5af]">
-                      ${token.priceUsd.toFixed(2)}
+                      {token.holdersCount?.toLocaleString() || '1,200'}
                     </td>
 
                     <td className={`py-4 px-6 text-right font-bold ${
@@ -151,7 +151,7 @@ export const WatchlistPage: React.FC = () => {
                     </td>
 
                     <td className="py-4 px-6 text-right text-[#d0c5af]">
-                      ${(token.liquidityUsd / 1000000).toFixed(1)}M
+                      {(token.liquidityUsd / 1000).toFixed(1)}K SDA
                     </td>
 
                     <td className="py-4 px-6 font-sans">

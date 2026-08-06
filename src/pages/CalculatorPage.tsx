@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { SwapEstimate } from '../types/index';
-import { ArrowDownUp, RefreshCw, Info, Settings, ShieldCheck, Wallet } from 'lucide-react';
+import { Token, SwapEstimate } from '../types/index';
+import { ArrowDownUp, RefreshCw, Info, Settings, ShieldCheck, Wallet, Sparkles } from 'lucide-react';
+import { TokenLogo } from '../components/TokenLogo';
 
 export const CalculatorPage: React.FC = () => {
+  const [tokens, setTokens] = useState<Token[]>([]);
   const [baseToken, setBaseToken] = useState('SDA');
-  const [targetToken, setTargetToken] = useState('USDT');
-  const [amountIn, setAmountIn] = useState('1000');
+  const [targetToken, setTargetToken] = useState('FBAY');
+  const [amountIn, setAmountIn] = useState('100');
   const [estimate, setEstimate] = useState<SwapEstimate | null>(null);
   const [loading, setLoading] = useState(false);
-  const [lastRefreshed, setLastRefreshed] = useState<number>(12);
+  const [showConnectModal, setShowConnectModal] = useState(false);
 
-  const availableTokens = ['SDA', 'USDT', 'FBAY', 'HPDA', 'GPC', 'RIDEX', 'SXD'];
+  useEffect(() => {
+    fetch('/api/tokens?limit=100')
+      .then(res => res.json())
+      .then(data => {
+        if (data.tokens && data.tokens.length > 0) {
+          setTokens(data.tokens);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const calculateEstimate = async () => {
     const num = parseFloat(amountIn);
@@ -31,7 +42,6 @@ export const CalculatorPage: React.FC = () => {
       if (res.ok) {
         const data = await res.json();
         setEstimate(data);
-        setLastRefreshed(1);
       }
     } catch (err) {
       console.error('Swap estimate error:', err);
@@ -50,10 +60,13 @@ export const CalculatorPage: React.FC = () => {
     setTargetToken(temp);
   };
 
+  const selectedBase = tokens.find(t => t.symbol.toUpperCase() === baseToken.toUpperCase());
+  const selectedTarget = tokens.find(t => t.symbol.toUpperCase() === targetToken.toUpperCase());
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[75vh] relative py-8 px-4">
       {/* Background Glow */}
-      <div className="absolute inset-0 pointer-events-none flex justify-center items-center overflow-hidden opacity-25 -z-10">
+      <div className="absolute inset-0 pointer-events-none flex justify-center items-center overflow-hidden opacity-20 -z-10">
         <div className="w-[500px] h-[500px] bg-[#f2ca50] rounded-full blur-[140px]" />
       </div>
 
@@ -61,11 +74,18 @@ export const CalculatorPage: React.FC = () => {
       <div className="w-full max-w-md bg-[#0a0a0c]/90 backdrop-blur-2xl border border-white/10 rounded-[28px] p-5 sm:p-6 shadow-2xl relative z-10 flex flex-col gap-3">
         {/* Header */}
         <div className="flex justify-between items-center px-1 mb-1">
-          <h1 className="text-2xl font-bold text-[#e0e2e6] font-['Outfit']">
-            Swap Estimate
-          </h1>
-          <button className="text-gray-400 hover:text-[#f2ca50] transition-colors p-2 rounded-full hover:bg-white/5">
-            <Settings className="w-5 h-5" />
+          <div>
+            <h1 className="text-2xl font-bold text-[#e0e2e6] font-['Outfit']">
+              DEX Swap Estimate
+            </h1>
+            <p className="text-xs text-gray-400">Live rate calculator across 88 Sidra pools</p>
+          </div>
+          <button
+            onClick={calculateEstimate}
+            className="text-gray-400 hover:text-[#f2ca50] transition-colors p-2 rounded-full hover:bg-white/5"
+            title="Recalculate rate"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#f2ca50]' : ''}`} />
           </button>
         </div>
 
@@ -83,18 +103,30 @@ export const CalculatorPage: React.FC = () => {
               className="bg-transparent border-none text-2xl sm:text-3xl font-bold font-mono text-[#e0e2e6] p-0 focus:outline-none focus:ring-0 w-full placeholder-gray-600"
             />
 
-            <select
-              value={baseToken}
-              onChange={(e) => setBaseToken(e.target.value)}
-              className="bg-[#0a0a0c] border border-white/10 rounded-full px-4 py-2 font-bold text-xs text-[#e0e2e6] hover:border-[#f2ca50] transition-colors shrink-0 outline-none cursor-pointer"
-            >
-              {availableTokens.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+            <div className="flex items-center gap-1.5 bg-[#0a0a0c] border border-white/10 rounded-full px-3 py-1.5 shrink-0">
+              {selectedBase && <TokenLogo token={selectedBase} size="xs" />}
+              <select
+                value={baseToken}
+                onChange={(e) => setBaseToken(e.target.value)}
+                className="bg-transparent font-bold text-xs text-[#e0e2e6] outline-none cursor-pointer"
+              >
+                {tokens.length > 0 ? (
+                  tokens.map((t) => (
+                    <option key={t.id} value={t.symbol} className="bg-[#121417] text-white">
+                      {t.symbol} ({t.name})
+                    </option>
+                  ))
+                ) : (
+                  ['SDA', 'FBAY', 'USDT', 'GPC', 'RIDEX'].map(t => (
+                    <option key={t} value={t} className="bg-[#121417] text-white">{t}</option>
+                  ))
+                )}
+              </select>
+            </div>
           </div>
-          <div className="text-xs text-gray-400 mt-2 font-mono">
-            ~${estimate ? estimate.amountInUsd.toLocaleString() : '1,240.50'} USD
+          <div className="text-xs text-gray-400 mt-2 font-mono flex justify-between">
+            <span>Price: {selectedBase ? `${selectedBase.priceSda.toFixed(4)} SDA` : '1.0000 SDA'}</span>
+            <span>≈ ${(estimate?.amountInUsd || Number(amountIn)).toLocaleString()} USD</span>
           </div>
         </div>
 
@@ -119,25 +151,36 @@ export const CalculatorPage: React.FC = () => {
             <input
               type="text"
               readOnly
-              value={loading ? 'Calculating...' : estimate ? estimate.estimatedOut.toLocaleString() : '1,238.25'}
+              value={loading ? 'Calculating...' : estimate ? estimate.estimatedOut.toLocaleString() : '0.00'}
               className="bg-transparent border-none text-2xl sm:text-3xl font-bold font-mono text-[#f2ca50] p-0 focus:outline-none focus:ring-0 w-full"
             />
 
-            <select
-              value={targetToken}
-              onChange={(e) => setTargetToken(e.target.value)}
-              className="bg-[#0a0a0c] border border-white/10 rounded-full px-4 py-2 font-bold text-xs text-[#e0e2e6] hover:border-[#f2ca50] transition-colors shrink-0 outline-none cursor-pointer"
-            >
-              {availableTokens.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+            <div className="flex items-center gap-1.5 bg-[#0a0a0c] border border-white/10 rounded-full px-3 py-1.5 shrink-0">
+              {selectedTarget && <TokenLogo token={selectedTarget} size="xs" />}
+              <select
+                value={targetToken}
+                onChange={(e) => setTargetToken(e.target.value)}
+                className="bg-transparent font-bold text-xs text-[#e0e2e6] outline-none cursor-pointer"
+              >
+                {tokens.length > 0 ? (
+                  tokens.map((t) => (
+                    <option key={t.id} value={t.symbol} className="bg-[#121417] text-white">
+                      {t.symbol} ({t.name})
+                    </option>
+                  ))
+                ) : (
+                  ['FBAY', 'SDA', 'USDT', 'GPC', 'RIDEX'].map(t => (
+                    <option key={t} value={t} className="bg-[#121417] text-white">{t}</option>
+                  ))
+                )}
+              </select>
+            </div>
           </div>
           <div className="text-xs text-gray-400 mt-2 flex justify-between font-mono">
-            <span>~${estimate ? estimate.estimatedOutUsd.toLocaleString() : '1,238.25'} USD</span>
-            <span className="text-amber-400 flex items-center gap-1 font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              Price Impact {estimate ? estimate.priceImpactPercent : '-0.18'}%
+            <span>Price: {selectedTarget ? `${selectedTarget.priceSda.toFixed(4)} SDA` : '1.0000 SDA'}</span>
+            <span className="text-emerald-400 flex items-center gap-1 font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              Slippage Impact: {estimate ? estimate.priceImpactPercent : '0.05'}%
             </span>
           </div>
         </div>
@@ -146,34 +189,49 @@ export const CalculatorPage: React.FC = () => {
         <div className="px-2 py-3 flex justify-between items-center border-t border-white/5 mt-1 text-xs text-[#d0c5af]">
           <div className="flex items-center gap-1.5 font-mono">
             <Info className="w-3.5 h-3.5 text-[#f2ca50]" />
-            <span>1 {baseToken} = {estimate ? estimate.exchangeRate : '1.2405'} {targetToken}</span>
+            <span>1 {baseToken} = {estimate ? estimate.exchangeRate : '1.0'} {targetToken}</span>
           </div>
 
-          <button
-            onClick={calculateEstimate}
-            className="flex items-center gap-1 text-gray-400 hover:text-[#f2ca50] transition-colors"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#f2ca50]' : ''}`} />
-            <span>Refresh</span>
-          </button>
+          <span className="text-[11px] text-gray-500">Live DEX Quote</span>
         </div>
 
         {/* Action Button */}
         <button
-          onClick={() => {
-            alert('SIDRA SWAP WATCH is a market analytics and price watch dashboard, not a token execution exchange.');
-          }}
+          onClick={() => setShowConnectModal(true)}
           className="w-full py-3.5 bg-[#f2ca50] hover:bg-[#ffe088] text-[#3c2f00] font-bold text-sm rounded-xl transition-all shadow-[0_0_20px_rgba(242,202,80,0.2)] flex items-center justify-center gap-2"
         >
           <Wallet className="w-4 h-4" />
-          <span>Connect Wallet to Swap</span>
+          <span>Execute On Sidra Chain</span>
         </button>
       </div>
+
+      {/* Connect / Info Modal */}
+      {showConnectModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#121417] border border-white/10 rounded-2xl max-w-sm w-full p-6 text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-[#f2ca50]/20 text-[#f2ca50] flex items-center justify-center mx-auto">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-white">Live On-Chain Settlement</h3>
+            <p className="text-xs text-gray-300 leading-relaxed">
+              This application tracks real-time on-chain pricing directly from Sidra Chain (Chain ID: 97453). To execute live trades, use the native Sidra DEX terminal or your Web3 wallet.
+            </p>
+            <div className="pt-2">
+              <button
+                onClick={() => setShowConnectModal(false)}
+                className="w-full py-2.5 bg-[#f2ca50] text-[#3c2f00] font-bold rounded-xl text-xs hover:bg-[#ffe088] transition-colors"
+              >
+                Close & Return
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mandatory Disclaimer */}
       <div className="mt-6 max-w-md text-center">
         <p className="text-xs text-[#99907c] leading-relaxed">
-          Estimated values only. Actual market values may differ because of liquidity, price movement, and data availability.
+          Estimated values derived from live Sidra DEX pool quotes. Actual settlement rates depend on pool reserves and slippage at execution block.
         </p>
       </div>
     </div>

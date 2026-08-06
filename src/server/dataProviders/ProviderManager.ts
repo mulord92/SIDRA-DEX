@@ -6,7 +6,7 @@ import { SidraDexWebProvider } from './SidraDexWebProvider.js';
 import { Token, VerificationStatus, PriceAlert, AuditLog, DataProviderType } from '../../types/index.js';
 
 export class ProviderManager {
-  private activeProviderType: DataProviderType = 'demo';
+  private activeProviderType: DataProviderType = 'sidradex_web';
   private providers: Record<DataProviderType, IDataProvider>;
   private customTokens: Map<string, Token> = new Map();
   private alerts: PriceAlert[] = [];
