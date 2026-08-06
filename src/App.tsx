@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
-import { WalletModal } from './components/WalletModal';
 import { DisclaimerFooter } from './components/DisclaimerFooter';
 
 // Pages
@@ -18,8 +17,6 @@ import { AdminPage } from './pages/AdminPage';
 export default function App() {
   const [currentPath, setCurrentPath] = useState<string>(window.location.pathname);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [walletModalOpen, setWalletModalOpen] = useState(false);
-  const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
 
   // Sync route on popstate or navigation
   useEffect(() => {
@@ -94,8 +91,6 @@ export default function App() {
       {/* Top Header */}
       <Header
         onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
-        connectedAddress={connectedAddress}
-        onOpenWalletModal={() => setWalletModalOpen(true)}
       />
 
       <div className="flex flex-1 relative">
@@ -104,7 +99,10 @@ export default function App() {
           activePath={currentPath}
           isOpenMobile={mobileMenuOpen}
           onCloseMobile={() => setMobileMenuOpen(false)}
-          onUpgradeClick={() => setWalletModalOpen(true)}
+          onUpgradeClick={() => {
+            window.history.pushState({}, '', '/about');
+            setCurrentPath('/about');
+          }}
         />
 
         {/* Main Content Area */}
@@ -115,15 +113,6 @@ export default function App() {
           <DisclaimerFooter />
         </main>
       </div>
-
-      {/* Connect Wallet Modal */}
-      <WalletModal
-        isOpen={walletModalOpen}
-        onClose={() => setWalletModalOpen(false)}
-        connectedAddress={connectedAddress}
-        onConnect={(addr) => setConnectedAddress(addr)}
-        onDisconnect={() => setConnectedAddress(null)}
-      />
     </div>
   );
 }

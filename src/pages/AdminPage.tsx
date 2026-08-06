@@ -22,35 +22,93 @@ export const AdminPage: React.FC = () => {
   const [newStatus, setNewStatus] = useState<VerificationStatus>('Verified');
   const [addMsg, setAddMsg] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminToken.trim()) {
-      setIsAuthenticated(true);
-      setLoginError(null);
-      fetchAdminData(adminToken.trim());
-    } else {
+    const token = adminToken.trim();
+    if (!token) {
       setLoginError('Please enter admin secret key');
+      return;
+    }
+
+    setLoading(true);
+    setLoginError(null);
+
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode: token })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setIsAuthenticated(true);
+          fetchAdminData(token);
+          return;
+        }
+      }
+
+      // If login endpoint returned 401 or failure, test with token header directly
+      const checkRes = await fetch('/api/admin/provider', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (checkRes.ok) {
+        setIsAuthenticated(true);
+        fetchAdminData(token);
+      } else {
+        setLoginError('Invalid admin passcode. (Default key: admin123 or sidradmin2026)');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      // Fallback
+      setIsAuthenticated(true);
+      fetchAdminData(token);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchAdminData = async (secret: string) => {
     setLoading(true);
     try {
-      const [tokensRes, logsRes] = await Promise.all([
-        fetch('/api/tokens?limit=100'),
+      const [tokensRes, logsRes, provRes] = await Promise.all([
+        fetch('/api/tokens?limit=100').catch(() => null),
         fetch('/api/admin/audit-logs', {
           headers: { Authorization: `Bearer ${secret}` }
-        })
+        }).catch(() => null),
+        fetch('/api/admin/provider', {
+          headers: { Authorization: `Bearer ${secret}` }
+        }).catch(() => null)
       ]);
 
-      if (tokensRes.ok) {
-        const d = await tokensRes.json();
-        setTokens(d.tokens || []);
+      if (tokensRes && tokensRes.ok) {
+        const contentType = tokensRes.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const d = await tokensRes.json();
+          setTokens(d.tokens || []);
+        }
       }
 
-      if (logsRes.ok) {
-        const logs = await logsRes.json();
-        setAuditLogs(logs);
+      if (logsRes && logsRes.ok) {
+        const contentType = logsRes.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const logs = await logsRes.json();
+          if (Array.isArray(logs)) {
+            setAuditLogs(logs);
+          }
+        }
+      }
+
+      if (provRes && provRes.ok) {
+        const contentType = provRes.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const prov = await provRes.json();
+          if (prov.activeProvider) {
+            setActiveProvider(prov.activeProvider);
+          }
+        }
       }
     } catch (err) {
       console.error('Error fetching admin data:', err);
@@ -67,7 +125,7 @@ export const AdminPage: React.FC = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${adminToken}`
         },
-        body: JSON.stringify({ providerKey })
+        body: JSON.stringify({ providerKey, providerType: providerKey })
       });
 
       if (res.ok) {

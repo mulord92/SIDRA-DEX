@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
-import { Menu, Bell, Settings, Wallet, CheckCircle, Search, ShieldCheck } from 'lucide-react';
+import { Menu, Bell, Settings, CheckCircle, Search, ShieldCheck } from 'lucide-react';
 
 interface Props {
   onToggleMobileMenu: () => void;
-  connectedAddress: string | null;
-  onOpenWalletModal: () => void;
   activeProviderName?: string;
   onSearchSubmit?: (query: string) => void;
 }
 
 export const Header: React.FC<Props> = ({
   onToggleMobileMenu,
-  connectedAddress,
-  onOpenWalletModal,
   activeProviderName = 'Sidra Demo Data Provider',
   onSearchSubmit
 }) => {
@@ -123,19 +119,6 @@ export const Header: React.FC<Props> = ({
         >
           <Settings className="w-5 h-5" />
         </a>
-
-        {/* Connect Wallet */}
-        <button
-          onClick={onOpenWalletModal}
-          className="bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-black font-bold text-xs px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-1.5 shadow-[0_0_15px_rgba(212,175,55,0.3)]"
-        >
-          <Wallet className="w-4 h-4" />
-          <span>
-            {connectedAddress
-              ? `${connectedAddress.slice(0, 5)}...${connectedAddress.slice(-4)}`
-              : 'Connect Wallet'}
-          </span>
-        </button>
       </div>
     </header>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Token, SwapEstimate } from '../types/index';
-import { ArrowDownUp, RefreshCw, Info, Settings, ShieldCheck, Wallet, Sparkles } from 'lucide-react';
+import { ArrowDownUp, RefreshCw, Info, Settings, ShieldCheck, Sparkles, ExternalLink } from 'lucide-react';
 import { TokenLogo } from '../components/TokenLogo';
 
 export const CalculatorPage: React.FC = () => {
@@ -200,8 +200,8 @@ export const CalculatorPage: React.FC = () => {
           onClick={() => setShowConnectModal(true)}
           className="w-full py-3.5 bg-[#f2ca50] hover:bg-[#ffe088] text-[#3c2f00] font-bold text-sm rounded-xl transition-all shadow-[0_0_20px_rgba(242,202,80,0.2)] flex items-center justify-center gap-2"
         >
-          <Wallet className="w-4 h-4" />
-          <span>Execute On Sidra Chain</span>
+          <Sparkles className="w-4 h-4" />
+          <span>Execution Details & Route</span>
         </button>
       </div>
 
