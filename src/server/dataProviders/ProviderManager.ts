@@ -98,8 +98,8 @@ export class ProviderManager {
       dataSource: this.getActiveProvider().name,
       lastUpdated: new Date().toISOString(),
       totalSupply: tokenData.totalSupply ?? existing?.totalSupply ?? 100000000,
-      circulatingSupply: tokenData.circulatingSupply ?? existing?.circulatingSupply ?? 50000000,
-      marketCapUsd: ((tokenData.circulatingSupply ?? existing?.circulatingSupply ?? 50000000) * (tokenData.priceSda ?? existing?.priceSda ?? 1.0) * 1.2405),
+      circulatingSupply: tokenData.circulatingSupply ?? existing?.circulatingSupply ?? 10000000,
+      marketCapUsd: ((tokenData.circulatingSupply ?? existing?.circulatingSupply ?? 10000000) * (tokenData.priceSda ?? existing?.priceSda ?? 1.0) * 1.2405),
       fdvUsd: ((tokenData.totalSupply ?? existing?.totalSupply ?? 100000000) * (tokenData.priceSda ?? existing?.priceSda ?? 1.0) * 1.2405),
       description: tokenData.description || existing?.description || 'Custom token registered on SIDRA SWAP WATCH.',
       isDisabled: tokenData.isDisabled ?? existing?.isDisabled ?? false

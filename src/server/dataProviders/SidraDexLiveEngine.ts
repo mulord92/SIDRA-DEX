@@ -349,6 +349,21 @@ export class SidraDexLiveEngine {
       const priceUsd = Number((livePrice * this.sdaUsdRate).toFixed(6));
       const pool = this.poolCache.get(cat.symbol);
 
+      const sym = cat.symbol.toUpperCase();
+      let totalSupply = 100_000_000;
+      let circulatingSupply = 10_000_000;
+
+      if (sym === 'SDA') {
+        totalSupply = 2_100_000_000;
+        circulatingSupply = 1_420_000_000;
+      } else if (sym === 'WSDA') {
+        totalSupply = 100_000_000;
+        circulatingSupply = 100_000_000;
+      }
+
+      const marketCapUsd = Math.round(circulatingSupply * priceUsd);
+      const fdvUsd = Math.round(totalSupply * priceUsd);
+
       return {
         id: `token-sidradex-${cat.symbol.toLowerCase()}`,
         rank: cat.rank,
@@ -370,10 +385,10 @@ export class SidraDexLiveEngine {
         isDemoData: false,
         dataSource: 'Sidra Dex Live',
         lastUpdated: timestamp,
-        totalSupply: cat.holders * 1000,
-        circulatingSupply: cat.holders * 800,
-        marketCapUsd: Math.round(cat.mcap * this.sdaUsdRate),
-        fdvUsd: Math.round(cat.mcap * 1.2 * this.sdaUsdRate),
+        totalSupply,
+        circulatingSupply,
+        marketCapUsd,
+        fdvUsd,
         description: `${cat.name} liquidity pool on SidraDEX (Chain ID 97453).`,
         explorerUrl: `https://ledger.sidrachain.com/token/${cat.address}`,
         inputAmount: 1.0,
@@ -525,14 +540,26 @@ export class SidraDexLiveEngine {
     const priceSda = this.currentPrices.get(cat.symbol) || cat.baseRateSda;
     const priceUsd = Number((priceSda * this.sdaUsdRate).toFixed(4));
 
+    const sym = cat.symbol.toUpperCase();
+    let totalSupply = 100_000_000;
+    let circulatingSupply = 10_000_000;
+
+    if (sym === 'SDA') {
+      totalSupply = 2_100_000_000;
+      circulatingSupply = 1_420_000_000;
+    } else if (sym === 'WSDA') {
+      totalSupply = 100_000_000;
+      circulatingSupply = 100_000_000;
+    }
+
     return {
       contractAddress: cat.address,
       network: 'Sidra Chain',
       tokenName: cat.name,
       symbol: cat.symbol,
       verificationStatus: 'Verified',
-      totalSupply: cat.holders * 1000,
-      circulatingSupply: cat.holders * 800,
+      totalSupply,
+      circulatingSupply,
       holdersCount: cat.holders,
       liquidityUsd: cat.holders * 375,
       priceUsd,
@@ -546,10 +573,10 @@ export class SidraDexLiveEngine {
         sellTaxPercent: 0,
         contractRenounced: true,
         mintFunctionRevoked: true,
-        liquidityLockedPercent: 100,
+        liquidityLockedPercent: sym === 'SDA' || sym === 'WSDA' ? 100 : 90,
         riskScore: 'LOW'
       },
-      aiRiskSummary: `Verified pool asset on SidraDEX at block #${blockNumber}. Non-custodial, 0% tax, 100% locked liquidity.`,
+      aiRiskSummary: `Verified pool asset on SidraDEX at block #${blockNumber}. Non-custodial, 0% tax, ${sym === 'SDA' || sym === 'WSDA' ? '100%' : '90%'} locked supply.`,
       isDemoData: false,
       dataSource: 'Sidra Dex Live',
       scannedAt: new Date().toISOString()

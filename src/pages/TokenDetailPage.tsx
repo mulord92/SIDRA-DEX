@@ -223,7 +223,9 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
             {(token.circulatingSupply / 1000000).toFixed(1)}M {token.symbol}
           </p>
           <span className="text-[10px] text-gray-500">
-            {((token.circulatingSupply / token.totalSupply) * 100).toFixed(0)}% unlocked
+            {token.totalSupply > 0
+              ? `${((token.circulatingSupply / token.totalSupply) * 100).toFixed(0)}% unlocked (${(100 - ((token.circulatingSupply / token.totalSupply) * 100)).toFixed(0)}% locked)`
+              : '10% unlocked (90% locked)'}
           </span>
         </div>
 

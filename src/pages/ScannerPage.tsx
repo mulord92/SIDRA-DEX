@@ -204,9 +204,14 @@ export const ScannerPage: React.FC = () => {
                     <span className="font-mono text-[#e0e2e6]">{(result.circulatingSupply / 1000000).toFixed(0)}M {result.symbol}</span>
                   </div>
                   <div className="w-full h-1.5 bg-[#1d2023] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#f2ca50] w-[68%]" />
+                    <div
+                      className="h-full bg-[#f2ca50]"
+                      style={{ width: `${Math.min(100, Math.max(0, (result.circulatingSupply / (result.totalSupply || 1)) * 100))}%` }}
+                    />
                   </div>
-                  <p className="text-[10px] text-right text-gray-400 mt-1">68.45% Unlocked</p>
+                  <p className="text-[10px] text-right text-gray-400 mt-1">
+                    {((result.circulatingSupply / (result.totalSupply || 1)) * 100).toFixed(0)}% Unlocked ({Math.max(0, 100 - Math.round((result.circulatingSupply / (result.totalSupply || 1)) * 100))}% Locked)
+                  </p>
                 </div>
               </div>
             </div>
