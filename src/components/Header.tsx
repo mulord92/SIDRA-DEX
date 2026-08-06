@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { Menu, Bell, Settings, CheckCircle, Search, ShieldCheck } from 'lucide-react';
+import { Menu, Bell, Settings, CheckCircle, Search, ShieldCheck, Smartphone } from 'lucide-react';
 
 interface Props {
   onToggleMobileMenu: () => void;
   activeProviderName?: string;
   onSearchSubmit?: (query: string) => void;
+  onOpenAndroidModal?: () => void;
 }
 
 export const Header: React.FC<Props> = ({
   onToggleMobileMenu,
   activeProviderName = 'Sidra Demo Data Provider',
-  onSearchSubmit
+  onSearchSubmit,
+  onOpenAndroidModal
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -119,6 +121,17 @@ export const Header: React.FC<Props> = ({
         >
           <Settings className="w-5 h-5" />
         </a>
+
+        {/* Android App Button */}
+        {onOpenAndroidModal && (
+          <button
+            onClick={onOpenAndroidModal}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-yellow-500/20 to-amber-500/10 hover:from-yellow-500/30 hover:to-amber-500/20 border border-yellow-500/40 text-yellow-400 font-bold text-xs transition-all shadow-[0_0_15px_rgba(242,202,80,0.15)]"
+          >
+            <Smartphone className="w-4 h-4 text-yellow-400 animate-pulse" />
+            <span className="hidden sm:inline">Android App</span>
+          </button>
+        )}
       </div>
     </header>
   );

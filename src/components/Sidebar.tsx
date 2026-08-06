@@ -12,7 +12,8 @@ import {
   Zap,
   Settings,
   HelpCircle,
-  X
+  X,
+  Smartphone
 } from 'lucide-react';
 
 interface Props {
@@ -20,13 +21,15 @@ interface Props {
   isOpenMobile: boolean;
   onCloseMobile: () => void;
   onUpgradeClick?: () => void;
+  onOpenAndroidModal?: () => void;
 }
 
 export const Sidebar: React.FC<Props> = ({
   activePath,
   isOpenMobile,
   onCloseMobile,
-  onUpgradeClick
+  onUpgradeClick,
+  onOpenAndroidModal
 }) => {
   const navItems = [
     { label: 'Dashboard', path: '/', icon: LayoutDashboard },
@@ -121,6 +124,16 @@ export const Sidebar: React.FC<Props> = ({
             <Zap className="w-4 h-4 text-yellow-500 group-hover:scale-110 transition-transform" />
             <span>Upgrade to Pro</span>
           </button>
+
+          {onOpenAndroidModal && (
+            <button
+              onClick={onOpenAndroidModal}
+              className="w-full py-2 px-3 bg-gradient-to-r from-yellow-500/20 to-amber-500/10 text-yellow-400 border border-yellow-500/30 rounded-xl font-bold text-xs hover:bg-yellow-500/20 transition-all flex items-center justify-center gap-2"
+            >
+              <Smartphone className="w-4 h-4 text-yellow-400" />
+              <span>Install Android App</span>
+            </button>
+          )}
 
           <div className="space-y-1">
             <a

@@ -69,6 +69,17 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Explicit static serving for PWA Android Manifest & Service Worker
+app.get('/manifest.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/manifest+json');
+  res.sendFile(path.join(process.cwd(), 'public', 'manifest.json'));
+});
+
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(process.cwd(), 'public', 'sw.js'));
+});
+
 // Global stats
 app.get('/api/stats', async (req, res) => {
   try {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { DisclaimerFooter } from './components/DisclaimerFooter';
+import { AndroidAppModal } from './components/AndroidAppModal';
 
 // Pages
 import { DashboardPage } from './pages/DashboardPage';
@@ -17,6 +18,16 @@ import { AdminPage } from './pages/AdminPage';
 export default function App() {
   const [currentPath, setCurrentPath] = useState<string>(window.location.pathname);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [androidModalOpen, setAndroidModalOpen] = useState(false);
+
+  // Register Service Worker for Android PWA offline support & WebAPK capabilities
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch((err) => {
+        console.warn('SW registration skipped:', err);
+      });
+    }
+  }, []);
 
   // Sync route on popstate or navigation
   useEffect(() => {
@@ -91,6 +102,7 @@ export default function App() {
       {/* Top Header */}
       <Header
         onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
+        onOpenAndroidModal={() => setAndroidModalOpen(true)}
       />
 
       <div className="flex flex-1 relative">
@@ -99,6 +111,7 @@ export default function App() {
           activePath={currentPath}
           isOpenMobile={mobileMenuOpen}
           onCloseMobile={() => setMobileMenuOpen(false)}
+          onOpenAndroidModal={() => setAndroidModalOpen(true)}
           onUpgradeClick={() => {
             window.history.pushState({}, '', '/about');
             setCurrentPath('/about');
@@ -113,6 +126,12 @@ export default function App() {
           <DisclaimerFooter />
         </main>
       </div>
+
+      {/* Android App Launcher Modal */}
+      <AndroidAppModal
+        isOpen={androidModalOpen}
+        onClose={() => setAndroidModalOpen(false)}
+      />
     </div>
   );
 }
