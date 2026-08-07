@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ScanResult } from '../types/index';
+import { safeFetchJson } from '../utils/api';
 import { DemoDataBadge } from '../components/DemoDataBadge';
 import { Radar, ShieldCheck, CheckCircle2, AlertTriangle, Search, Copy, Check, Sparkles, PieChart, Users, Droplet, Lock } from 'lucide-react';
 
@@ -22,18 +23,15 @@ export const ScannerPage: React.FC = () => {
     setScanning(true);
 
     try {
-      const res = await fetch('/api/scanner/scan', {
+      const data = await safeFetchJson<ScanResult>('/api/scanner/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contractAddress: val, network })
       });
 
-      if (!res.ok) throw new Error('Contract analysis failed. Check contract format.');
-
-      const data: ScanResult = await res.json();
       setResult(data);
     } catch (err: any) {
-      setError(err.message || 'Error executing intelligence scan.');
+      setError(err?.message || 'Error executing intelligence scan.');
     } finally {
       setScanning(false);
     }

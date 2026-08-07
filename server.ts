@@ -16,7 +16,7 @@ app.use((req, res, next) => {
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
     const now = Date.now();
     const windowMs = 60000; // 1 minute
-    const maxRequests = 120; // 120 requests per minute
+    const maxRequests = 1000; // 1000 requests per minute for reliable live polling
 
     const userLimit = rateLimitMap.get(ip) || { count: 0, resetTime: now + windowMs };
 
@@ -30,6 +30,7 @@ app.use((req, res, next) => {
     rateLimitMap.set(ip, userLimit);
 
     if (userLimit.count > maxRequests) {
+      res.setHeader('Content-Type', 'application/json');
       res.status(429).json({ error: 'Too many requests. Please try again in a minute.' });
       return;
     }
@@ -333,8 +334,8 @@ app.put('/api/admin/tokens/:symbol', verifyAdminAuth, async (req, res) => {
   }
 });
 
-// Update verification status
-app.post('/api/admin/tokens/:symbol/verify', verifyAdminAuth, async (req, res) => {
+// Update verification status (supports POST /verify, PATCH /status, POST /status)
+const handleUpdateStatus = async (req: express.Request, res: express.Response) => {
   try {
     const { symbol } = req.params;
     const { status } = req.body;
@@ -344,7 +345,7 @@ app.post('/api/admin/tokens/:symbol/verify', verifyAdminAuth, async (req, res) =
       return;
     }
 
-    const updated = await providerManager.updateVerificationStatus(symbol, status, 'Admin');
+    const updated = await providerManager.updateVerificationStatus(symbol, status as any, 'Admin');
     if (!updated) {
       res.status(404).json({ error: 'Token not found' });
       return;
@@ -354,10 +355,14 @@ app.post('/api/admin/tokens/:symbol/verify', verifyAdminAuth, async (req, res) =
   } catch (error) {
     res.status(500).json({ error: 'Failed to update token verification status' });
   }
-});
+};
+
+app.post('/api/admin/tokens/:symbol/verify', verifyAdminAuth, handleUpdateStatus);
+app.post('/api/admin/tokens/:symbol/status', verifyAdminAuth, handleUpdateStatus);
+app.patch('/api/admin/tokens/:symbol/status', verifyAdminAuth, handleUpdateStatus);
 
 // Disable / Enable Token Feed
-app.post('/api/admin/tokens/:symbol/toggle-feed', verifyAdminAuth, async (req, res) => {
+const handleToggleFeed = async (req: express.Request, res: express.Response) => {
   try {
     const { symbol } = req.params;
     const { disabled } = req.body;
@@ -367,7 +372,10 @@ app.post('/api/admin/tokens/:symbol/toggle-feed', verifyAdminAuth, async (req, r
   } catch (error) {
     res.status(500).json({ error: 'Failed to toggle token feed' });
   }
-});
+};
+
+app.post('/api/admin/tokens/:symbol/toggle-feed', verifyAdminAuth, handleToggleFeed);
+app.patch('/api/admin/tokens/:symbol/toggle-feed', verifyAdminAuth, handleToggleFeed);
 
 // Set Provider
 app.get('/api/admin/provider', verifyAdminAuth, (req, res) => {
@@ -378,7 +386,7 @@ app.get('/api/admin/provider', verifyAdminAuth, (req, res) => {
 });
 
 app.post('/api/admin/provider', verifyAdminAuth, (req, res) => {
-  const { providerType } = req.body;
+  const providerType = req.body.providerType || req.body.providerKey;
   if (!['demo', 'official', 'indexer', 'sidradex_web'].includes(providerType)) {
     res.status(400).json({ error: 'Invalid provider type' });
     return;
@@ -392,9 +400,27 @@ app.post('/api/admin/provider', verifyAdminAuth, (req, res) => {
   });
 });
 
-// Audit Logs
+// Audit Logs (supports both /api/admin/logs and /api/admin/audit-logs)
 app.get('/api/admin/logs', verifyAdminAuth, (req, res) => {
   res.json(providerManager.getAuditLogs());
+});
+app.get('/api/admin/audit-logs', verifyAdminAuth, (req, res) => {
+  res.json(providerManager.getAuditLogs());
+});
+
+// Explicit API 404 handler to prevent API calls from returning index.html
+app.all('/api/*', (req, res) => {
+  res.status(404).json({ error: `API endpoint ${req.method} ${req.originalUrl} not found` });
+});
+
+// Global API Error Handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (req.path.startsWith('/api/')) {
+    console.error('Unhandled API Error:', err);
+    res.status(500).json({ error: err?.message || 'Internal server error occurred' });
+    return;
+  }
+  next(err);
 });
 
 // ================= VITE INTEGRATION =================

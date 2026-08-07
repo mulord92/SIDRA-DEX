@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Token } from '../types/index';
+import { safeFetchJson } from '../utils/api';
 import { DemoDataBadge } from '../components/DemoDataBadge';
 import { Eye, Trash2, Bell, ExternalLink, Plus, Search } from 'lucide-react';
 
@@ -29,17 +30,14 @@ export const WatchlistPage: React.FC = () => {
   const fetchWatchlistTokens = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/tokens?limit=50');
-      if (res.ok) {
-        const data = await res.json();
-        const all: Token[] = data.tokens || [];
-        const filtered = all.filter(t =>
-          watchlistSymbols.map(s => s.toUpperCase()).includes(t.symbol.toUpperCase())
-        );
-        setTokens(filtered);
-      }
+      const data = await safeFetchJson<{ tokens: Token[] }>('/api/tokens?limit=100');
+      const all: Token[] = data?.tokens || [];
+      const filtered = all.filter(t =>
+        watchlistSymbols.map(s => s.toUpperCase()).includes(t.symbol.toUpperCase())
+      );
+      setTokens(filtered);
     } catch (err) {
-      console.error('Error fetching watchlist tokens:', err);
+      console.warn('Error fetching watchlist tokens:', err);
     } finally {
       setLoading(false);
     }

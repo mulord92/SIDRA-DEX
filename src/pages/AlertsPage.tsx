@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { PriceAlert } from '../types/index';
+import { safeFetchJson } from '../utils/api';
 import { Bell, Plus, Trash2, CheckCircle, ArrowUpRight, ArrowDownRight, BellRing } from 'lucide-react';
 
 export const AlertsPage: React.FC = () => {
@@ -16,13 +17,12 @@ export const AlertsPage: React.FC = () => {
   const fetchAlerts = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/alerts');
-      if (res.ok) {
-        const data = await res.json();
+      const data = await safeFetchJson<PriceAlert[]>('/api/alerts');
+      if (Array.isArray(data)) {
         setAlerts(data);
       }
     } catch (err) {
-      console.error('Failed to fetch price alerts:', err);
+      console.warn('Failed to fetch price alerts:', err);
     } finally {
       setLoading(false);
     }
@@ -37,7 +37,7 @@ export const AlertsPage: React.FC = () => {
     if (!symbol || !targetPrice) return;
 
     try {
-      const res = await fetch('/api/alerts', {
+      await safeFetchJson('/api/alerts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -48,21 +48,19 @@ export const AlertsPage: React.FC = () => {
         })
       });
 
-      if (res.ok) {
-        setShowModal(false);
-        fetchAlerts();
-      }
+      setShowModal(false);
+      fetchAlerts();
     } catch (err) {
-      console.error('Error creating alert:', err);
+      console.warn('Error creating alert:', err);
     }
   };
 
   const handleDeleteAlert = async (id: string) => {
     try {
-      const res = await fetch(`/api/alerts/${id}`, { method: 'DELETE' });
-      if (res.ok) fetchAlerts();
+      await safeFetchJson(`/api/alerts/${id}`, { method: 'DELETE' });
+      fetchAlerts();
     } catch (err) {
-      console.error('Error deleting alert:', err);
+      console.warn('Error deleting alert:', err);
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Token, MarketGlobalStats } from '../types/index';
+import { safeFetchJson } from '../utils/api';
 import { DemoDataBadge } from '../components/DemoDataBadge';
 import { TokenLogo } from '../components/TokenLogo';
 import { DashboardPriceChart } from '../components/DashboardPriceChart';
@@ -17,26 +18,17 @@ export const DashboardPage: React.FC = () => {
     if (!silent) setLoading(true);
     setErrorMsg(null);
     try {
-      const [statsRes, tokensRes] = await Promise.all([
-        fetch('/api/stats'),
-        fetch('/api/tokens?limit=100')
+      const [statsData, tokensData] = await Promise.all([
+        safeFetchJson<MarketGlobalStats>('/api/stats'),
+        safeFetchJson<{ tokens: Token[] }>('/api/tokens?limit=100')
       ]);
 
-      if (!statsRes.ok || !tokensRes.ok) {
-        const errJson = await (tokensRes.ok ? statsRes : tokensRes).json().catch(() => ({}));
-        setErrorMsg(errJson.error || 'SidraDEX market data is temporarily unavailable.');
-        return;
-      }
-
-      const statsData = await statsRes.json();
-      setStats(statsData);
-
-      const tokensData = await tokensRes.json();
-      setTokens(tokensData.tokens || []);
+      if (statsData) setStats(statsData);
+      if (tokensData && tokensData.tokens) setTokens(tokensData.tokens);
       setLastRefreshed(new Date().toLocaleTimeString());
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-      setErrorMsg('SidraDEX market data is temporarily unavailable.');
+    } catch (error: any) {
+      console.warn('Dashboard data refresh notice:', error?.message || error);
+      setErrorMsg(error?.message || 'SidraDEX market data is temporarily unavailable.');
     } finally {
       if (!silent) setLoading(false);
     }

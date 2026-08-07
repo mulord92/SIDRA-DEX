@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Token, VerificationStatus, AuditLog } from '../types/index';
+import { safeFetchJson } from '../utils/api';
 import { DemoDataBadge } from '../components/DemoDataBadge';
 import { ShieldCheck, Lock, CheckCircle, XCircle, RefreshCw, Layers, Plus, Power } from 'lucide-react';
 
@@ -36,24 +37,22 @@ export const AdminPage: React.FC = () => {
   const fetchAdminData = async (secret: string) => {
     setLoading(true);
     try {
-      const [tokensRes, logsRes] = await Promise.all([
-        fetch('/api/tokens?limit=100'),
-        fetch('/api/admin/audit-logs', {
+      const [tokensData, logsData] = await Promise.all([
+        safeFetchJson<{ tokens: Token[] }>('/api/tokens?limit=100'),
+        safeFetchJson<AuditLog[]>('/api/admin/audit-logs', {
           headers: { Authorization: `Bearer ${secret}` }
-        })
+        }).catch(() => [])
       ]);
 
-      if (tokensRes.ok) {
-        const d = await tokensRes.json();
-        setTokens(d.tokens || []);
+      if (tokensData && tokensData.tokens) {
+        setTokens(tokensData.tokens);
       }
 
-      if (logsRes.ok) {
-        const logs = await logsRes.json();
-        setAuditLogs(logs);
+      if (Array.isArray(logsData)) {
+        setAuditLogs(logsData);
       }
     } catch (err) {
-      console.error('Error fetching admin data:', err);
+      console.warn('Error fetching admin data:', err);
     } finally {
       setLoading(false);
     }
@@ -61,27 +60,25 @@ export const AdminPage: React.FC = () => {
 
   const handleSwitchProvider = async (providerKey: string) => {
     try {
-      const res = await fetch('/api/admin/provider', {
+      await safeFetchJson('/api/admin/provider', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${adminToken}`
         },
-        body: JSON.stringify({ providerKey })
+        body: JSON.stringify({ providerKey, providerType: providerKey })
       });
 
-      if (res.ok) {
-        setActiveProvider(providerKey);
-        fetchAdminData(adminToken);
-      }
+      setActiveProvider(providerKey);
+      fetchAdminData(adminToken);
     } catch (err) {
-      console.error('Error switching provider:', err);
+      console.warn('Error switching provider:', err);
     }
   };
 
   const handleUpdateStatus = async (symbol: string, status: VerificationStatus) => {
     try {
-      const res = await fetch(`/api/admin/tokens/${symbol}/status`, {
+      await safeFetchJson(`/api/admin/tokens/${symbol}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -90,11 +87,9 @@ export const AdminPage: React.FC = () => {
         body: JSON.stringify({ status })
       });
 
-      if (res.ok) {
-        fetchAdminData(adminToken);
-      }
+      fetchAdminData(adminToken);
     } catch (err) {
-      console.error('Error updating status:', err);
+      console.warn('Error updating status:', err);
     }
   };
 
@@ -103,7 +98,7 @@ export const AdminPage: React.FC = () => {
     if (!newSymbol || !newName || !newContract) return;
 
     try {
-      const res = await fetch('/api/admin/tokens', {
+      await safeFetchJson('/api/admin/tokens', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,15 +114,14 @@ export const AdminPage: React.FC = () => {
         })
       });
 
-      if (res.ok) {
-        setAddMsg(`Token ${newSymbol.toUpperCase()} added successfully.`);
-        setNewSymbol('');
-        setNewName('');
-        setNewContract('');
-        fetchAdminData(adminToken);
-      }
-    } catch (err) {
-      console.error('Error creating token:', err);
+      setAddMsg(`Token ${newSymbol.toUpperCase()} added successfully.`);
+      setNewSymbol('');
+      setNewName('');
+      setNewContract('');
+      fetchAdminData(adminToken);
+    } catch (err: any) {
+      console.warn('Error creating token:', err);
+      setAddMsg('Failed to add token.');
     }
   };
 

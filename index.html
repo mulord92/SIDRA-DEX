@@ -2,6 +2,38 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
+    <!-- Wallet Extension Redefinition Guard -->
+    <script>
+      (function() {
+        try {
+          const origDefineProperty = Object.defineProperty;
+          Object.defineProperty = function(obj, prop, descriptor) {
+            if ((obj === window || obj === globalThis) && prop === 'ethereum') {
+              try {
+                return origDefineProperty.call(this, obj, prop, descriptor);
+              } catch (err) {
+                console.warn('Handled injected wallet ethereum redefinition conflict:', err);
+                try {
+                  if (descriptor && 'value' in descriptor) {
+                    obj[prop] = descriptor.value;
+                  }
+                } catch (_) {}
+                return obj;
+              }
+            }
+            return origDefineProperty.call(this, obj, prop, descriptor);
+          };
+        } catch (_) {}
+
+        window.addEventListener('error', function(event) {
+          if (event && event.message && String(event.message).includes('Cannot redefine property: ethereum')) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return true;
+          }
+        }, true);
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>SIDRA SWAP WATCH | Live Prices • Token Analytics • Market Insights</title>
     <!-- Android PWA & Mobile Web App Meta Tags -->

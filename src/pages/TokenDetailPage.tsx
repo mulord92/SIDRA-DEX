@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Token, PricePoint } from '../types/index';
+import { safeFetchJson } from '../utils/api';
 import { DemoDataBadge } from '../components/DemoDataBadge';
 import { TokenLogo } from '../components/TokenLogo';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
@@ -22,22 +23,16 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
     setLoading(true);
     setError(null);
     try {
-      const [tokenRes, historyRes] = await Promise.all([
-        fetch(`/api/tokens/${symbol}`),
-        fetch(`/api/tokens/${symbol}/history?timeframe=${timeframe}`)
+      const [tokenData, historyData] = await Promise.all([
+        safeFetchJson<Token>(`/api/tokens/${symbol}`),
+        safeFetchJson<PricePoint[]>(`/api/tokens/${symbol}/history?timeframe=${timeframe}`).catch(() => [])
       ]);
 
-      if (!tokenRes.ok) throw new Error(`Token '${symbol}' not found.`);
-
-      const tokenData = await tokenRes.json();
+      if (!tokenData) throw new Error(`Token '${symbol}' not found.`);
       setToken(tokenData);
-
-      if (historyRes.ok) {
-        const historyData = await historyRes.json();
-        setChartData(historyData);
-      }
+      setChartData(Array.isArray(historyData) ? historyData : []);
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch token telemetry.');
+      setError(err?.message || 'Failed to fetch token telemetry.');
     } finally {
       setLoading(false);
     }

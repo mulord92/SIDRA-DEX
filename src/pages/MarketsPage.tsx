@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Token } from '../types/index';
+import { safeFetchJson } from '../utils/api';
 import { DemoDataBadge } from '../components/DemoDataBadge';
 import { TokenLogo } from '../components/TokenLogo';
 import { Search, ChevronLeft, ChevronRight, ExternalLink, ArrowUp, ArrowDown, RefreshCw, Radio, Sparkles } from 'lucide-react';
@@ -51,10 +52,7 @@ export const MarketsPage: React.FC = () => {
         limit: pageSize.toString()
       });
 
-      const res = await fetch(`/api/tokens?${queryParams.toString()}`);
-      if (!res.ok) throw new Error('Failed to load market data');
-
-      const data = await res.json();
+      const data = await safeFetchJson<{ tokens: Token[]; pagination: { totalPages: number; totalCount: number } }>(`/api/tokens?${queryParams.toString()}`);
       const newTokens: Token[] = data.tokens || [];
 
       // Check price changes for flash highlights

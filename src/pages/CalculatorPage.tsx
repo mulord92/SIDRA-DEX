@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Token, SwapEstimate } from '../types/index';
+import { safeFetchJson } from '../utils/api';
 import { ArrowDownUp, RefreshCw, Info, Settings, ShieldCheck, Sparkles, ExternalLink } from 'lucide-react';
 import { TokenLogo } from '../components/TokenLogo';
 
@@ -13,14 +14,13 @@ export const CalculatorPage: React.FC = () => {
   const [showConnectModal, setShowConnectModal] = useState(false);
 
   useEffect(() => {
-    fetch('/api/tokens?limit=100')
-      .then(res => res.json())
+    safeFetchJson<{ tokens: Token[] }>('/api/tokens?limit=100')
       .then(data => {
-        if (data.tokens && data.tokens.length > 0) {
+        if (data && data.tokens && data.tokens.length > 0) {
           setTokens(data.tokens);
         }
       })
-      .catch(console.error);
+      .catch(err => console.warn('Calculator tokens load error:', err));
   }, []);
 
   const calculateEstimate = async () => {
@@ -29,7 +29,7 @@ export const CalculatorPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/calculator/estimate', {
+      const data = await safeFetchJson<SwapEstimate>('/api/calculator/estimate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -39,12 +39,11 @@ export const CalculatorPage: React.FC = () => {
         })
       });
 
-      if (res.ok) {
-        const data = await res.json();
+      if (data) {
         setEstimate(data);
       }
     } catch (err) {
-      console.error('Swap estimate error:', err);
+      console.warn('Swap estimate error:', err);
     } finally {
       setLoading(false);
     }

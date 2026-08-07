@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Token, PricePoint } from '../types/index';
+import { safeFetchJson } from '../utils/api';
 import { TokenLogo } from './TokenLogo';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
 import { TrendingUp, TrendingDown, Activity, Sparkles, RefreshCw, Layers } from 'lucide-react';
@@ -29,14 +30,10 @@ export const DashboardPriceChart: React.FC<Props> = ({ tokens }) => {
     setError(null);
 
     try {
-      const res = await fetch(`/api/tokens/${selectedSymbol}/history?timeframe=${timeframe}`);
-      if (!res.ok) {
-        throw new Error(`Failed to load history for ${selectedSymbol}`);
-      }
-      const data = await res.json();
-      setHistory(data || []);
+      const data = await safeFetchJson<PricePoint[]>(`/api/tokens/${selectedSymbol}/history?timeframe=${timeframe}`);
+      setHistory(Array.isArray(data) ? data : []);
     } catch (err: any) {
-      console.error('Chart history fetch error:', err);
+      console.warn('Chart history fetch notice:', err?.message || err);
       setError('Price trend data temporarily unavailable');
     } finally {
       if (!silent) setLoading(false);
