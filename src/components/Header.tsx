@@ -90,7 +90,7 @@ export const Header: React.FC<Props> = ({
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-80 bg-black/90 border border-yellow-500/30 rounded-xl p-4 shadow-2xl z-50 text-xs backdrop-blur-xl">
               <div className="flex items-center justify-between pb-2 border-b border-white/10 mb-3">
-                <span className="font-bold text-white">Market Telemetry & Alerts</span>
+                <span className="font-bold text-white">Market Insights & Alerts</span>
                 <span className="text-[10px] text-yellow-500 font-mono">Live Feed</span>
               </div>
               <div className="space-y-3 max-h-60 overflow-y-auto pr-1">

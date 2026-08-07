@@ -55,7 +55,7 @@ export const DashboardPage: React.FC = () => {
             Market Analytics Cockpit
           </h1>
           <p className="text-xs md:text-sm text-[#d0c5af] mt-1">
-            Real-time on-chain price telemetry and pool depth for all 88 SidraChain DEX assets.
+            Real-time on-chain prices and pool depth for all 88 SidraChain DEX assets.
           </p>
         </div>
 

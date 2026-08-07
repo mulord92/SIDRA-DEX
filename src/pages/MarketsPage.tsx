@@ -132,7 +132,7 @@ export const MarketsPage: React.FC = () => {
             SidraDEX Live Markets
           </h1>
           <p className="text-xs md:text-sm text-[#d0c5af] mt-1">
-            Real-time pool quotes and on-chain telemetry from Sidra Dex Live.
+            Real-time pool quotes and on-chain market data from Sidra Dex Live.
           </p>
         </div>
 
@@ -413,7 +413,7 @@ export const MarketsPage: React.FC = () => {
                             window.location.href = `/token/${token.symbol}`;
                           }}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-[#f2ca50] hover:bg-white/10 transition-colors"
-                          title="View Token Telemetry"
+                          title="View Token Analytics"
                         >
                           <ExternalLink className="w-4 h-4" />
                         </button>

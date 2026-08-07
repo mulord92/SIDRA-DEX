@@ -32,7 +32,7 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
       setToken(tokenData);
       setChartData(Array.isArray(historyData) ? historyData : []);
     } catch (err: any) {
-      setError(err?.message || 'Failed to fetch token telemetry.');
+      setError(err?.message || 'Failed to fetch token market data.');
     } finally {
       setLoading(false);
     }
@@ -54,7 +54,7 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
     return (
       <div className="py-20 text-center space-y-4">
         <RefreshCw className="w-8 h-8 text-[#f2ca50] animate-spin mx-auto" />
-        <p className="text-xs text-[#d0c5af]">Fetching telemetry & live pricing for {symbol}...</p>
+        <p className="text-xs text-[#d0c5af]">Fetching live pricing for {symbol}...</p>
       </div>
     );
   }
@@ -136,7 +136,7 @@ export const TokenDetailPage: React.FC<Props> = ({ symbolParam }) => {
               <BarChart2 className="w-4 h-4 text-[#f2ca50]" />
               Historical Price Performance
             </h2>
-            <p className="text-xs text-[#d0c5af]">Timeframe chart rendered via institutional telemetry feeds.</p>
+            <p className="text-xs text-[#d0c5af]">Timeframe chart rendered via market data feeds.</p>
           </div>
 
           {/* Timeframe Buttons */}

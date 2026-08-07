@@ -112,7 +112,7 @@ export const DashboardPriceChart: React.FC<Props> = ({ tokens }) => {
           {/* Real-time sync badge */}
           <div className="ml-auto lg:ml-2 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 border border-white/5 text-[11px] text-gray-400 font-mono">
             <span className={`w-2 h-2 rounded-full ${isLiveUpdating ? 'bg-yellow-400 animate-ping' : 'bg-emerald-400'}`} />
-            <span>REAL-TIME TELEMETRY</span>
+            <span>REAL-TIME LIVE DATA</span>
           </div>
         </div>
 
@@ -319,7 +319,7 @@ export const DashboardPriceChart: React.FC<Props> = ({ tokens }) => {
           href={`/token/${selectedSymbol}`}
           className="text-[#f2ca50] hover:underline font-semibold flex items-center gap-1 hover:text-yellow-300"
         >
-          <span>Deep Telemetry for {selectedSymbol}</span>
+          <span>View Analytics for {selectedSymbol}</span>
           <span>→</span>
         </a>
       </div>

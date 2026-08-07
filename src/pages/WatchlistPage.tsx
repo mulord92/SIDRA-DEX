@@ -71,7 +71,7 @@ export const WatchlistPage: React.FC = () => {
             User Watchlist
           </h1>
           <p className="text-xs md:text-sm text-[#d0c5af] mt-1">
-            Personalized market telemetry tracker for your prioritized SidraChain assets.
+            Personalized market tracker for your prioritized SidraChain assets.
           </p>
         </div>
 
@@ -97,7 +97,7 @@ export const WatchlistPage: React.FC = () => {
       {/* Watchlist Data Table */}
       <div className="glass-panel rounded-2xl border border-white/10 overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-xs text-gray-400">Loading watchlist telemetry...</div>
+          <div className="p-12 text-center text-xs text-gray-400">Loading watchlist...</div>
         ) : tokens.length === 0 ? (
           <div className="p-12 text-center text-xs text-gray-400 space-y-2">
             <p className="font-bold text-[#e0e2e6]">Your watchlist is currently empty</p>

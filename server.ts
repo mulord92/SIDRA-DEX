@@ -189,7 +189,7 @@ app.get('/api/tokens/:symbol/history', async (req, res) => {
   }
 });
 
-// Deep Contract Scanner
+// Contract Scanner
 app.post('/api/scanner/scan', async (req, res) => {
   try {
     const { contractAddress, network = 'SidraChain Mainnet' } = req.body;

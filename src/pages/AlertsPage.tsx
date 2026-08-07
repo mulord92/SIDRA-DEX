@@ -74,7 +74,7 @@ export const AlertsPage: React.FC = () => {
             Price Alerts & Volatility Signals
           </h1>
           <p className="text-xs md:text-sm text-[#d0c5af] mt-1">
-            Configure automated telemetry threshold triggers for instant market shift notifications.
+            Configure automated price threshold triggers for instant market shift notifications.
           </p>
         </div>
 

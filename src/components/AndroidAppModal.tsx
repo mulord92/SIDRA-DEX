@@ -106,7 +106,7 @@ export const AndroidAppModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   Android Native PWA
                 </span>
               </div>
-              <p className="text-xs text-gray-400 font-mono">Real-time DEX Telemetry • WebAPK Enabled</p>
+              <p className="text-xs text-gray-400 font-mono">Real-time DEX Market Data • WebAPK Enabled</p>
             </div>
           </div>
           <button
@@ -203,7 +203,7 @@ export const AndroidAppModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 <div className="p-3 bg-white/5 rounded-xl border border-white/5 space-y-1">
                   <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
                     <CheckCircle className="w-3.5 h-3.5" />
-                    <span>Offline Telemetry</span>
+                    <span>Offline Analytics</span>
                   </div>
                   <p className="text-gray-400 text-[11px]">Service Worker caching allows viewing watchlists offline.</p>
                 </div>

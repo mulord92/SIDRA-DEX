@@ -53,7 +53,7 @@ export const ScannerPage: React.FC = () => {
           Token Scanner
         </h1>
         <p className="text-xs md:text-sm text-[#d0c5af] mt-1">
-          Deploy deep-contract analysis to verify integrity, liquidity depth, and holder distribution before executing trades.
+          Analyze contract code to verify integrity, liquidity depth, and holder distribution before executing trades.
         </p>
       </div>
 
@@ -121,7 +121,7 @@ export const ScannerPage: React.FC = () => {
       {scanning && (
         <div className="py-20 text-center glass-panel rounded-2xl p-8 space-y-4">
           <Radar className="w-10 h-10 text-[#f2ca50] animate-spin mx-auto" />
-          <p className="text-sm font-semibold text-[#e0e2e6]">Scanning Smart Contract Telemetry...</p>
+          <p className="text-sm font-semibold text-[#e0e2e6]">Analyzing Smart Contract...</p>
           <p className="text-xs text-gray-400">Evaluating honeypot traps, tax variables, liquidity locks, and AI risk profiles.</p>
         </div>
       )}
@@ -286,11 +286,11 @@ export const ScannerPage: React.FC = () => {
             </div>
           </div>
 
-          {/* AI Security Assessment (Gemini Telemetry) */}
+          {/* AI Security Assessment */}
           {result.aiRiskSummary && (
             <div className="p-5 rounded-2xl bg-[#1d2023] border border-[#f2ca50]/30 space-y-2">
               <div className="flex items-center gap-2 text-xs font-bold text-[#f2ca50] uppercase tracking-wider">
-                <Sparkles className="w-4 h-4" /> Gemini AI Telemetry Security Assessment
+                <Sparkles className="w-4 h-4" /> Gemini AI Security Assessment
               </div>
               <p className="text-xs text-[#e0e2e6] leading-relaxed">
                 {result.aiRiskSummary}
