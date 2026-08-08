@@ -40,19 +40,6 @@ const FEATURED_SYMBOLS = ['SDA', 'FBAY', 'WPX', 'WSDA', 'GPC', 'RIDEX'];
 type TimeframeInterval = '1m' | '5m' | '15m' | '30m' | '1H' | '4H' | '1D' | '7D' | '1M' | 'ALL';
 type ChartStyle = 'area' | 'candlestick' | 'stepped';
 
-interface LiveDEXTx {
-  id: string;
-  time: string;
-  txHash: string;
-  type: 'BUY' | 'SELL';
-  amountToken: number;
-  priceSda: number;
-  priceUsd: number;
-  totalUsd: number;
-  blockNumber: number;
-  isLarge: boolean;
-}
-
 export const DashboardPriceChart: React.FC<Props> = ({ tokens, onUpgradeClick }) => {
   const [selectedSymbol, setSelectedSymbol] = useState<string>('FBAY');
   const [timeframe, setTimeframe] = useState<TimeframeInterval>('1m');
@@ -65,14 +52,11 @@ export const DashboardPriceChart: React.FC<Props> = ({ tokens, onUpgradeClick })
   const [sub, setSub] = useState(subscriptionService.getSubscription());
   const isPro = sub.plan === 'pro' || sub.plan === 'elite';
 
-  // Real-time On-Chain Streaming Engine (ledger.sidrachain.com)
+  // Real-time On-Chain Streaming Engine
   const [isStreaming, setIsStreaming] = useState<boolean>(true);
   const [lastTickDirection, setLastTickDirection] = useState<'up' | 'down' | 'neutral'>('up');
   const [tickFlash, setTickFlash] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const [liveTrades, setLiveTrades] = useState<LiveDEXTx[]>([]);
-  const [showTradeTape, setShowTradeTape] = useState<boolean>(true);
-  const [tradeFilter, setTradeFilter] = useState<'ALL' | 'BUYS' | 'SELLS' | 'WHALES'>('ALL');
   const [liveBlockNumber, setLiveBlockNumber] = useState<number>(33178420);
   const [liveTps, setLiveTps] = useState<number>(19.4);
   const [lastSyncTimestamp, setLastSyncTimestamp] = useState<string>(new Date().toLocaleTimeString());
@@ -86,12 +70,6 @@ export const DashboardPriceChart: React.FC<Props> = ({ tokens, onUpgradeClick })
   const [showMACD, setShowMACD] = useState<boolean>(false);
 
   const prevPriceRef = useRef<number>(0);
-  const tradeSeqRef = useRef<number>(0);
-
-  const createUniqueTradeId = () => {
-    tradeSeqRef.current += 1;
-    return `tx-${Date.now()}-${tradeSeqRef.current}-${Math.random().toString(36).substring(2, 8)}`;
-  };
 
   useEffect(() => {
     return subscriptionService.subscribe((currentSub) => {
@@ -130,39 +108,7 @@ export const DashboardPriceChart: React.FC<Props> = ({ tokens, onUpgradeClick })
     fetchHistory(false);
   }, [selectedSymbol, timeframe]);
 
-  // Generate initial verified DEX trade tape from ledger.sidrachain.com
-  useEffect(() => {
-    const initialTrades: LiveDEXTx[] = [];
-    const basePrice = selectedToken ? selectedToken.priceSda : 1.42;
-    const now = Date.now();
-
-    for (let i = 0; i < 8; i++) {
-      const isBuy = Math.random() > 0.42;
-      const amount = Math.floor(Math.random() * 4500 + 350);
-      const jitter = (Math.random() - 0.5) * 0.012 * basePrice;
-      const tradePriceSda = Math.max(0.001, basePrice + jitter);
-      const tradePriceUsd = tradePriceSda * 15.00;
-      const totalUsd = amount * tradePriceUsd;
-      const txRandomHex = Math.random().toString(16).substring(2, 10);
-
-      initialTrades.push({
-        id: createUniqueTradeId(),
-        time: new Date(now - i * 3500).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        txHash: `0x${txRandomHex}...${(33178420 - i).toString(16)}`,
-        type: isBuy ? 'BUY' : 'SELL',
-        amountToken: amount,
-        priceSda: Number(tradePriceSda.toFixed(4)),
-        priceUsd: Number(tradePriceUsd.toFixed(4)),
-        totalUsd: Number(totalUsd.toFixed(2)),
-        blockNumber: 33178420 - i,
-        isLarge: totalUsd > 1000
-      });
-    }
-
-    setLiveTrades(initialTrades);
-  }, [selectedSymbol]);
-
-  // Real-time On-Chain synchronization based on ledger.sidrachain.com (Minimum 1 minute candle aggregation)
+  // Real-time On-Chain synchronization based on ledger.sidrachain.com
   useEffect(() => {
     if (!isStreaming) return;
 
@@ -170,9 +116,8 @@ export const DashboardPriceChart: React.FC<Props> = ({ tokens, onUpgradeClick })
       // 1. Advance block height and network telemetry
       setLiveBlockNumber(b => b + 1);
       setLastSyncTimestamp(new Date().toLocaleTimeString());
-      setLiveTps(Number((18.5 + Math.random() * 6.2).toFixed(1)));
 
-      // 2. Real-time on-chain quote update & candle adjustment
+      // 2. Real-time quote update & candle adjustment
       setHistory(prev => {
         if (!prev || prev.length === 0) return prev;
 
@@ -188,28 +133,6 @@ export const DashboardPriceChart: React.FC<Props> = ({ tokens, onUpgradeClick })
         setTickFlash(true);
         setTimeout(() => setTickFlash(false), 450);
 
-        // Create new verified on-chain trade in tape
-        const isBuy = dir === 'up' ? Math.random() > 0.25 : Math.random() > 0.65;
-        const tradeAmount = Math.floor(Math.random() * 3200 + 200);
-        const totalUsd = tradeAmount * newPriceUsd;
-        const txRandomHex = Math.random().toString(16).substring(2, 10);
-        const blockNum = liveBlockNumber + 1;
-
-        const newTrade: LiveDEXTx = {
-          id: createUniqueTradeId(),
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-          txHash: `0x${txRandomHex}...${blockNum.toString(16)}`,
-          type: isBuy ? 'BUY' : 'SELL',
-          amountToken: tradeAmount,
-          priceSda: newPriceSda,
-          priceUsd: newPriceUsd,
-          totalUsd: Number(totalUsd.toFixed(2)),
-          blockNumber: blockNum,
-          isLarge: totalUsd > 1200
-        };
-
-        setLiveTrades(tList => [newTrade, ...tList.filter(t => t.id !== newTrade.id).slice(0, 19)]);
-
         // Update current 1-minute candle dynamically
         const updatedLast: PricePoint = {
           ...last,
@@ -221,11 +144,11 @@ export const DashboardPriceChart: React.FC<Props> = ({ tokens, onUpgradeClick })
           highUsd: Math.max(last.highUsd || last.priceUsd, newPriceUsd),
           lowUsd: Math.min(last.lowUsd || last.priceUsd, newPriceUsd),
           closeUsd: newPriceUsd,
-          volumeUsd: (last.volumeUsd || 1000) + Math.round(Math.random() * 250)
+          volumeUsd: (last.volumeUsd || 1000)
         };
         return [...prev.slice(0, prev.length - 1), updatedLast];
       });
-    }, 3500); // 3.5s interval matching SidraChain on-chain consensus block confirmation time
+    }, 3500);
 
     return () => clearInterval(interval);
   }, [isStreaming, timeframe, selectedSymbol, currency, liveBlockNumber]);
@@ -352,14 +275,6 @@ export const DashboardPriceChart: React.FC<Props> = ({ tokens, onUpgradeClick })
     if (val < 10) return val.toFixed(3);
     return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
-
-  // Filtered live trades
-  const filteredTrades = liveTrades.filter(tx => {
-    if (tradeFilter === 'BUYS') return tx.type === 'BUY';
-    if (tradeFilter === 'SELLS') return tx.type === 'SELL';
-    if (tradeFilter === 'WHALES') return tx.isLarge;
-    return true;
-  });
 
   return (
     <div className={`glass-panel rounded-2xl p-4 md:p-6 space-y-4 border border-white/10 relative overflow-hidden transition-all duration-300 ${isExpanded ? 'ring-2 ring-yellow-500/40 shadow-2xl' : ''}`}>
@@ -580,19 +495,6 @@ export const DashboardPriceChart: React.FC<Props> = ({ tokens, onUpgradeClick })
             title={isStreaming ? 'Pause On-Chain Stream' : 'Resume Live Ledger Stream'}
           >
             {isStreaming ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-          </button>
-
-          {/* Trade Tape Toggle */}
-          <button
-            onClick={() => setShowTradeTape(!showTradeTape)}
-            className={`p-1.5 rounded-lg border transition-all ${
-              showTradeTape
-                ? 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30'
-                : 'bg-white/5 text-gray-400 border-white/5 hover:text-white'
-            }`}
-            title="Toggle Live DEX Trade Stream Tape"
-          >
-            <Activity className="w-3.5 h-3.5" />
           </button>
 
           {/* Fullscreen Expand Toggle */}
@@ -1133,92 +1035,6 @@ export const DashboardPriceChart: React.FC<Props> = ({ tokens, onUpgradeClick })
           </div>
         )}
       </div>
-
-      {/* REAL-TIME ON-CHAIN DEX TRADE STREAM TAPE (ORDER FLOW FEED) */}
-      {showTradeTape && (
-        <div className="p-3.5 rounded-xl bg-black/70 border border-white/10 space-y-2.5">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
-              <h4 className="text-xs font-bold text-white font-['Outfit'] uppercase tracking-wider">
-                Live DEX Market Trades Tape ({selectedSymbol})
-              </h4>
-              <a
-                href="https://ledger.sidrachain.com"
-                target="_blank"
-                rel="noreferrer"
-                className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold hover:underline"
-              >
-                LEDGER.SIDRACHAIN.COM SYNC
-              </a>
-            </div>
-
-            {/* Trade Filter Tabs */}
-            <div className="flex items-center gap-1 bg-[#0d1117] p-1 rounded-lg border border-white/5 text-[10px] font-mono">
-              {(['ALL', 'BUYS', 'SELLS', 'WHALES'] as const).map(f => (
-                <button
-                  key={f}
-                  onClick={() => setTradeFilter(f)}
-                  className={`px-2 py-0.5 rounded font-bold transition-all ${
-                    tradeFilter === f ? 'bg-white/20 text-white' : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  {f}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Trade Rows Table */}
-          <div className="max-h-36 overflow-y-auto space-y-1 pr-1 font-mono text-[11px] scrollbar-thin scrollbar-thumb-white/10">
-            {filteredTrades.slice(0, 6).map((tx, idx) => (
-              <div
-                key={`${tx.id}-${idx}`}
-                className={`flex items-center justify-between p-1.5 rounded-lg border transition-all ${
-                  idx === 0
-                    ? (tx.type === 'BUY' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border-rose-500/30 text-rose-300')
-                    : 'bg-black/30 border-white/5 text-gray-300'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-gray-500">{tx.time}</span>
-                  <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
-                    tx.type === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
-                  }`}>
-                    {tx.type}
-                  </span>
-                  <span className="font-bold text-white">
-                    {tx.amountToken.toLocaleString()} {selectedSymbol}
-                  </span>
-                  <a
-                    href={`https://ledger.sidrachain.com`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[9px] text-yellow-500/70 hover:text-yellow-400 underline hidden sm:inline"
-                    title={`Tx: ${tx.txHash}`}
-                  >
-                    {tx.txHash}
-                  </a>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-gray-400">
-                    @{currency === 'USD' ? `$${formatPriceVal(tx.priceUsd)}` : `${formatPriceVal(tx.priceSda)} SDA`}
-                  </span>
-                  <span className={`font-bold ${tx.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    ${tx.totalUsd.toLocaleString()} USD
-                  </span>
-                  {tx.isLarge && (
-                    <span className="text-[9px] px-1 rounded bg-yellow-500/20 text-yellow-300 font-bold border border-yellow-500/30">
-                      WHALE
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* FOOTER NAVIGATION & STATUS BAR */}
       <div className="flex flex-col sm:flex-row items-center justify-between pt-2 text-xs text-gray-400 font-mono border-t border-white/5 gap-2">

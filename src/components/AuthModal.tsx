@@ -60,6 +60,8 @@ export const AuthModal: React.FC = () => {
         return 'Sign-in popup was closed before completing.';
       case 'auth/popup-blocked':
         return 'Pop-up blocked by browser. Please enable popups for Google Sign-In.';
+      case 'auth/unauthorized-domain':
+        return `This domain (${window.location.hostname}) is not authorized for Firebase Auth. Add it in Firebase Console -> Authentication -> Settings -> Authorized Domains.`;
       case 'auth/too-many-requests':
         return 'Too many failed attempts. Please wait a moment and try again.';
       default:
