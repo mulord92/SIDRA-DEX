@@ -193,15 +193,15 @@ export const AdminPage: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <button
-            onClick={() => handleSwitchProvider('demo')}
+            onClick={() => handleSwitchProvider('sidradex_web')}
             className={`p-3 rounded-xl border text-left transition-all ${
-              activeProvider === 'demo'
+              activeProvider === 'sidradex_web'
                 ? 'bg-[#f2ca50]/10 border-[#f2ca50] text-[#f2ca50]'
                 : 'bg-[#1d2023] border-white/5 text-gray-400 hover:border-white/20'
             }`}
           >
-            <p className="font-bold text-xs">Demo Data Provider</p>
-            <p className="text-[10px] opacity-80 mt-1">Simulated volatile feed for testing</p>
+            <p className="font-bold text-xs">Sidra Dex Live</p>
+            <p className="text-[10px] opacity-80 mt-1">Real-time ledger.sidrachain.com on-chain pool pricing</p>
           </button>
 
           <button
@@ -213,7 +213,7 @@ export const AdminPage: React.FC = () => {
             }`}
           >
             <p className="font-bold text-xs">Official Sidra API</p>
-            <p className="text-[10px] opacity-80 mt-1">Direct official API endpoint integration</p>
+            <p className="text-[10px] opacity-80 mt-1">Direct official RPC and API node endpoints</p>
           </button>
 
           <button
@@ -225,19 +225,19 @@ export const AdminPage: React.FC = () => {
             }`}
           >
             <p className="font-bold text-xs">Indexer Provider</p>
-            <p className="text-[10px] opacity-80 mt-1">Decentralized contract indexer feed</p>
+            <p className="text-[10px] opacity-80 mt-1">Decentralized contract indexer on-chain feed</p>
           </button>
 
           <button
-            onClick={() => handleSwitchProvider('sidradex_web')}
+            onClick={() => handleSwitchProvider('demo')}
             className={`p-3 rounded-xl border text-left transition-all ${
-              activeProvider === 'sidradex_web'
+              activeProvider === 'demo'
                 ? 'bg-[#f2ca50]/10 border-[#f2ca50] text-[#f2ca50]'
                 : 'bg-[#1d2023] border-white/5 text-gray-400 hover:border-white/20'
             }`}
           >
-            <p className="font-bold text-xs">Sidra Dex Live</p>
-            <p className="text-[10px] opacity-80 mt-1">Live on-chain pool pricing engine</p>
+            <p className="font-bold text-xs">Sandbox Fallback</p>
+            <p className="text-[10px] opacity-80 mt-1">Local sandbox fallback for offline testing</p>
           </button>
         </div>
       </div>

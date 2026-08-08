@@ -291,7 +291,7 @@ export const SIDRA_ALL_88_TOKENS: CatalogToken[] = [
   {
     "rank": 18,
     "symbol": "WPX",
-    "name": "widpnix",
+    "name": "Widpnix",
     "address": "0xfaeCbE5956a02e45Ee663922174F955ae78D0309",
     "decimals": 18,
     "isNative": false,

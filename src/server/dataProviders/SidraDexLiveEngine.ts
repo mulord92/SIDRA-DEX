@@ -41,7 +41,7 @@ export class SidraDexLiveEngine {
   private lastBlockNumber = 33178000;
   private lastSyncTime = Date.now();
   private isSyncing = false;
-  private sdaUsdRate = 1.00; // 1 SDA = $1.00 reference peg
+  private sdaUsdRate = 15.00; // 1 SDA = $15.00 reference peg
 
   private constructor() {
     // Initial prices from catalog
@@ -426,47 +426,126 @@ export class SidraDexLiveEngine {
     };
   }
 
-  public getPriceHistory(symbol: string, timeframe: string = '24H'): PricePoint[] {
+  public getPriceHistory(symbol: string, timeframe: string = '1M'): PricePoint[] {
     const sym = symbol.toUpperCase();
     const history = this.priceHistoryMap.get(sym) || [];
     const currentPrice = this.currentPrices.get(sym) || 1.0;
+    const tfUpper = (timeframe || '1M').toUpperCase();
 
     const now = Date.now();
     let cutoff = 0;
-    if (timeframe === '1H') cutoff = now - 60 * 60 * 1000;
-    else if (timeframe === '24H' || timeframe === '1D') cutoff = now - 24 * 60 * 60 * 1000;
-    else if (timeframe === '7D') cutoff = now - 7 * 24 * 60 * 60 * 1000;
-    else if (timeframe === '30D' || timeframe === '1M') cutoff = now - 30 * 24 * 60 * 60 * 1000;
-    else if (timeframe === '1Y') cutoff = now - 365 * 24 * 60 * 60 * 1000;
+    let pointsCount = 30;
+    let intervalMs = 60 * 1000; // Minimum 1 minute (60s) based on ledger.sidrachain.com
 
-    const filtered = cutoff > 0 ? history.filter(h => h.timestamp >= cutoff) : history;
+    if (tfUpper === '1S' || tfUpper === '5S' || tfUpper === '15S' || tfUpper === '1M' || tfUpper === '1MIN') {
+      // Enforce minimum interval of 1 minute (based on ledger.sidrachain.com block sync)
+      pointsCount = 30;
+      intervalMs = 60 * 1000;
+    } else if (tfUpper === '5M' || tfUpper === '5MIN') {
+      pointsCount = 30;
+      intervalMs = 5 * 60 * 1000;
+    } else if (tfUpper === '15M' || tfUpper === '15MIN') {
+      pointsCount = 30;
+      intervalMs = 15 * 60 * 1000;
+    } else if (tfUpper === '30M' || tfUpper === '30MIN') {
+      pointsCount = 30;
+      intervalMs = 30 * 60 * 1000;
+    } else if (tfUpper === '1H') {
+      cutoff = now - 60 * 60 * 1000;
+      pointsCount = 24;
+      intervalMs = 2.5 * 60 * 1000;
+    } else if (tfUpper === '4H') {
+      cutoff = now - 4 * 60 * 60 * 1000;
+      pointsCount = 24;
+      intervalMs = 10 * 60 * 1000;
+    } else if (tfUpper === '24H' || tfUpper === '1D') {
+      cutoff = now - 24 * 60 * 60 * 1000;
+      pointsCount = 24;
+      intervalMs = 60 * 60 * 1000;
+    } else if (tfUpper === '7D') {
+      cutoff = now - 7 * 24 * 60 * 60 * 1000;
+      pointsCount = 28;
+      intervalMs = 6 * 60 * 60 * 1000;
+    } else if (tfUpper === '30D' || tfUpper === '1MO') {
+      cutoff = now - 30 * 24 * 60 * 60 * 1000;
+      pointsCount = 30;
+      intervalMs = 24 * 60 * 60 * 1000;
+    } else if (tfUpper === '1Y' || tfUpper === 'ALL') {
+      cutoff = now - 365 * 24 * 60 * 60 * 1000;
+      pointsCount = 52;
+      intervalMs = 7 * 24 * 60 * 60 * 1000;
+    }
 
-    if (filtered.length > 0) {
-      return filtered.map(f => ({
-        timestamp: new Date(f.timestamp).toISOString(),
-        timeLabel: new Date(f.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        priceSda: f.price,
-        priceUsd: Number((f.price * this.sdaUsdRate).toFixed(6)),
-        volumeUsd: 1250
-      }));
+    const filtered = cutoff > 0 ? history.filter(h => h.timestamp >= cutoff) : [];
+
+    if (filtered.length >= 10) {
+      return filtered.map((f, i) => {
+        const pSda = f.price;
+        const pUsd = Number((f.price * this.sdaUsdRate).toFixed(6));
+        const prevSda = i > 0 ? filtered[i - 1].price : pSda * 0.995;
+        const openSda = prevSda;
+        const highSda = Math.max(openSda, pSda) * (1 + Math.random() * 0.004);
+        const lowSda = Math.min(openSda, pSda) * (1 - Math.random() * 0.004);
+        const closeSda = pSda;
+
+        return {
+          timestamp: new Date(f.timestamp).toISOString(),
+          timeLabel: new Date(f.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          priceSda: pSda,
+          priceUsd: pUsd,
+          volumeUsd: Math.round(1000 + Math.random() * 4000),
+          openSda: Number(openSda.toFixed(6)),
+          highSda: Number(highSda.toFixed(6)),
+          lowSda: Number(lowSda.toFixed(6)),
+          closeSda: Number(closeSda.toFixed(6)),
+          openUsd: Number((openSda * this.sdaUsdRate).toFixed(6)),
+          highUsd: Number((highSda * this.sdaUsdRate).toFixed(6)),
+          lowUsd: Number((lowSda * this.sdaUsdRate).toFixed(6)),
+          closeUsd: Number((closeSda * this.sdaUsdRate).toFixed(6)),
+          tradesCount: Math.floor(Math.random() * 15 + 3)
+        };
+      });
     }
 
     const change = (this.price24hChanges.get(sym) || 0) / 100;
-    const pointsCount = timeframe === '1H' ? 12 : 24;
-    const interval = timeframe === '1H' ? 5 * 60 * 1000 : 60 * 60 * 1000;
-    const startPrice = currentPrice / (1 + change);
+    const startPrice = currentPrice / (1 + change * (pointsCount > 24 ? 1 : 0.4));
 
     const points: PricePoint[] = [];
+    let runningPrice = startPrice;
+
     for (let i = 0; i < pointsCount; i++) {
       const progress = i / (pointsCount - 1);
-      const price = startPrice + (currentPrice - startPrice) * progress + (Math.sin(i * 0.8) * currentPrice * 0.015);
-      const ptTime = now - (pointsCount - 1 - i) * interval;
+      const trendPrice = startPrice + (currentPrice - startPrice) * progress;
+      const noise = (Math.sin(i * 0.9 + (i % 3)) * 0.008 + (Math.cos(i * 1.4) * 0.006)) * currentPrice;
+      const currentClose = i === pointsCount - 1 ? currentPrice : Math.max(0.0001, trendPrice + noise);
+      
+      const openPrice = runningPrice;
+      const highPrice = Math.max(openPrice, currentClose) * (1 + Math.random() * 0.005);
+      const lowPrice = Math.min(openPrice, currentClose) * (1 - Math.random() * 0.005);
+      const closePrice = currentClose;
+      runningPrice = currentClose;
+
+      const ptTime = now - (pointsCount - 1 - i) * intervalMs;
+      const d = new Date(ptTime);
+      const timeLabel = (tfUpper === '1M' || tfUpper === '5M' || tfUpper === '15M' || tfUpper === '30M' || tfUpper === '1H' || tfUpper === '4H' || tfUpper === '1D' || tfUpper === '24H') 
+        ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : `${d.getMonth() + 1}/${d.getDate()}`;
+
       points.push({
-        timestamp: new Date(ptTime).toISOString(),
-        timeLabel: new Date(ptTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        priceSda: Math.max(0.0001, Number(price.toFixed(6))),
-        priceUsd: Math.max(0.0001, Number((price * this.sdaUsdRate).toFixed(6))),
-        volumeUsd: Math.round(1500 + Math.random() * 2000)
+        timestamp: d.toISOString(),
+        timeLabel,
+        priceSda: Math.max(0.0001, Number(closePrice.toFixed(6))),
+        priceUsd: Math.max(0.0001, Number((closePrice * this.sdaUsdRate).toFixed(6))),
+        volumeUsd: Math.round(1500 + Math.random() * 4500),
+        openSda: Number(openPrice.toFixed(6)),
+        highSda: Number(highPrice.toFixed(6)),
+        lowSda: Number(lowPrice.toFixed(6)),
+        closeSda: Number(closePrice.toFixed(6)),
+        openUsd: Number((openPrice * this.sdaUsdRate).toFixed(6)),
+        highUsd: Number((highPrice * this.sdaUsdRate).toFixed(6)),
+        lowUsd: Number((lowPrice * this.sdaUsdRate).toFixed(6)),
+        closeUsd: Number((closePrice * this.sdaUsdRate).toFixed(6)),
+        tradesCount: Math.floor(Math.random() * 20 + 2)
       });
     }
 

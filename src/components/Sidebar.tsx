@@ -13,7 +13,10 @@ import {
   Settings,
   HelpCircle,
   X,
-  Smartphone
+  Smartphone,
+  Fish,
+  Sparkles,
+  Code
 } from 'lucide-react';
 
 interface Props {
@@ -35,10 +38,13 @@ export const Sidebar: React.FC<Props> = ({
     { label: 'Dashboard', path: '/', icon: LayoutDashboard },
     { label: 'Markets', path: '/markets', icon: TrendingUp },
     { label: 'Token Details', path: '/token/FBAY', icon: Coins },
-    { label: 'Scanner', path: '/scanner', icon: Radar },
+    { label: 'Whale Tracker', path: '/whales', icon: Fish, badge: 'Elite' },
+    { label: 'Scanner & Scorecard', path: '/scanner', icon: Radar },
+    { label: 'Smart Alerts', path: '/alerts', icon: BellRing, badge: 'Pro' },
     { label: 'Calculator', path: '/calculator', icon: Calculator },
     { label: 'Watchlist', path: '/watchlist', icon: Eye },
-    { label: 'Alerts', path: '/alerts', icon: BellRing },
+    { label: 'Pricing & Plans', path: '/pricing', icon: Sparkles },
+    { label: 'Developer API', path: '/developer', icon: Code },
     { label: 'About', path: '/about', icon: Info },
     { label: 'Admin', path: '/admin', icon: ShieldCheck },
   ];
@@ -61,7 +67,10 @@ export const Sidebar: React.FC<Props> = ({
       >
         {/* Mobile close button */}
         <div className="flex items-center justify-between px-3 mb-4 md:hidden">
-          <span className="font-bold text-yellow-500 text-sm">SIDRA SWAP WATCH</span>
+          <div className="flex items-center gap-2">
+            <img src="/app-logo.png" alt="Sidra Swap Watch Logo" className="w-6 h-6 object-contain" />
+            <span className="font-bold text-yellow-500 text-sm">SIDRA SWAP WATCH</span>
+          </div>
           <button
             onClick={onCloseMobile}
             className="p-1 rounded-lg text-gray-400 hover:text-white"
@@ -73,11 +82,11 @@ export const Sidebar: React.FC<Props> = ({
         {/* User / Terminal Access Profile Banner */}
         <div className="px-3 mb-6">
           <div className="flex items-center gap-3 p-2.5 rounded-xl bg-black/40 border border-white/5">
-            <div className="relative">
+            <div className="relative shrink-0">
               <img
-                src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=80"
-                alt="Terminal Access"
-                className="w-10 h-10 rounded-full border border-yellow-500/40 object-cover"
+                src="/app-logo.png"
+                alt="Sidra DEX Logo"
+                className="w-10 h-10 rounded-xl border border-yellow-500/40 object-contain p-1 bg-black/60 shadow-[0_0_12px_rgba(242,202,80,0.2)]"
               />
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
             </div>
@@ -102,14 +111,23 @@ export const Sidebar: React.FC<Props> = ({
               <a
                 key={item.path}
                 href={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition-all duration-200 ${
+                className={`flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-xs transition-all duration-200 ${
                   isActive
                     ? 'bg-yellow-500/10 text-yellow-500 border-r-2 border-yellow-500 font-semibold'
                     : 'text-gray-400 hover:bg-white/5 hover:text-white'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-yellow-500' : 'text-gray-400'}`} />
-                <span>{item.label}</span>
+                <div className="flex items-center gap-3">
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-yellow-500' : 'text-gray-400'}`} />
+                  <span>{item.label}</span>
+                </div>
+                {(item as any).badge && (
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold uppercase ${
+                    (item as any).badge === 'Elite' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                  }`}>
+                    {(item as any).badge}
+                  </span>
+                )}
               </a>
             );
           })}

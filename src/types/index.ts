@@ -33,6 +33,15 @@ export interface PricePoint {
   priceSda: number;
   priceUsd: number;
   volumeUsd: number;
+  openSda?: number;
+  highSda?: number;
+  lowSda?: number;
+  closeSda?: number;
+  openUsd?: number;
+  highUsd?: number;
+  lowUsd?: number;
+  closeUsd?: number;
+  tradesCount?: number;
 }
 
 export interface Token {
@@ -148,3 +157,125 @@ export interface MarketGlobalStats {
   lastUpdated: string;
   isDemoData: boolean;
 }
+
+// Subscription & Monetization Types
+export type SubscriptionPlan = 'free' | 'pro' | 'elite';
+
+export interface PlanFeature {
+  name: string;
+  free: boolean | string;
+  pro: boolean | string;
+  elite: boolean | string;
+  highlight?: boolean;
+}
+
+export interface UserSubscription {
+  plan: SubscriptionPlan;
+  billingCycle: 'monthly' | 'annual';
+  isTrialActive: boolean;
+  trialDaysLeft: number;
+  expiresAt: string;
+  paymentMethod?: string;
+}
+
+// Whale Tracker
+export interface WhaleTransaction {
+  id: string;
+  tokenSymbol: string;
+  tokenName: string;
+  type: 'Accumulation' | 'Large Sale' | 'Whale Transfer' | 'LP Injection';
+  amountToken: number;
+  amountSda: number;
+  usdValue: number;
+  fromAddress: string;
+  toAddress: string;
+  walletTag: 'Whale Wallet' | 'Institutional Fund' | 'DEX Liquidity Pool' | 'Early Investor' | 'Smart Trader';
+  timestamp: string;
+  txHash: string;
+}
+
+// Token Risk Scorecard (0-100 analytics)
+export interface TokenRiskScore {
+  overallScore: number;
+  liquidityScore: number;
+  volumeScore: number;
+  holderGrowthScore: number;
+  contractRisk: 'Low' | 'Medium' | 'High';
+  summaryVerdict: string;
+  riskFactors: string[];
+  safetyBadges: string[];
+}
+
+// Sidra Swap Watch AI Market Intelligence
+export interface TokenAIMarketIntelligence {
+  tokenSymbol: string;
+  momentum: 'Strong' | 'Moderate' | 'Neutral' | 'Weak';
+  volumeTrend: 'Increasing' | 'Stable' | 'Decreasing';
+  liquidityHealth: 'Healthy' | 'Moderate' | 'Low';
+  trend: 'Bullish' | 'Neutral' | 'Bearish';
+  momentum24hPercent: number;
+  aiSummary: string;
+  supportPriceSda: number;
+  resistancePriceSda: number;
+  rsi: number;
+  macd: string;
+  sma20: number;
+  ema50: number;
+  buyPressurePercent: number;
+  sellPressurePercent: number;
+  lastUpdated: string;
+}
+
+// Sponsored Token & Promoted Pools
+export interface SponsoredProject {
+  id: string;
+  tokenSymbol: string;
+  tokenName: string;
+  tagline: string;
+  logoUrl: string;
+  badge: 'Featured Project' | 'VIP Partner' | 'Promoted Pool' | 'Trending Sponsor';
+  promotedUntil: string;
+  ctaLink: string;
+  priceSda: number;
+  priceUsd: number;
+  change24h: number;
+  volume24hUsd: number;
+  contractAddress: string;
+}
+
+// Smart Alert Rule
+export type SmartAlertType =
+  | 'PRICE_TARGET'
+  | 'PERCENT_MOVEMENT'
+  | 'VOLUME_SPIKE'
+  | 'LIQUIDITY_CHANGE'
+  | 'NEW_ATH_ATL'
+  | 'TOP_GAINER_ENTRY'
+  | 'WHALE_ACTIVITY';
+
+export interface SmartAlertRule {
+  id: string;
+  tokenSymbol: string;
+  type: SmartAlertType;
+  thresholdValue: number | string;
+  direction?: 'ABOVE' | 'BELOW' | 'ANY';
+  tierRequired: SubscriptionPlan;
+  isActive: boolean;
+  createdAt: string;
+  userEmail?: string;
+  channel: 'In-App' | 'Email' | 'Webhook';
+}
+
+// Developer API Key
+export interface DeveloperApiKey {
+  id: string;
+  apiKey: string;
+  planName: 'Developer Starter' | 'Pro Data API' | 'Enterprise Feed';
+  monthlyPrice: number;
+  monthlyQuota: number;
+  usedQuota: number;
+  rateLimitPerSec: number;
+  createdAt: string;
+  status: 'Active' | 'Revoked';
+}
+

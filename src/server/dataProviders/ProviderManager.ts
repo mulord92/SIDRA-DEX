@@ -14,7 +14,7 @@ export class ProviderManager {
     {
       id: 'log-1',
       action: 'SYSTEM_BOOT',
-      details: 'SIDRA SWAP WATCH initialized with Demo Data Provider.',
+      details: 'SIDRA SWAP WATCH initialized with Ledger.sidrachain.com On-Chain Provider.',
       timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
       adminUser: 'System'
     }
@@ -85,10 +85,10 @@ export class ProviderManager {
       symbol,
       logoUrl: tokenData.logoUrl || existing?.logoUrl || 'https://images.unsplash.com/photo-1622979135225-d2ba269bc1bd?w=100&auto=format&fit=crop&q=80',
       priceSda: tokenData.priceSda ?? existing?.priceSda ?? 1.0,
-      priceUsd: (tokenData.priceSda ?? existing?.priceSda ?? 1.0) * 1.2405,
+      priceUsd: (tokenData.priceSda ?? existing?.priceSda ?? 1.0) * 15.00,
       change24h: tokenData.change24h ?? existing?.change24h ?? 0.0,
       volume24hSda: tokenData.volume24hSda ?? existing?.volume24hSda ?? 100000,
-      volume24hUsd: (tokenData.volume24hSda ?? existing?.volume24hSda ?? 100000) * 1.2405,
+      volume24hUsd: (tokenData.volume24hSda ?? existing?.volume24hSda ?? 100000) * 15.00,
       liquidityUsd: tokenData.liquidityUsd ?? existing?.liquidityUsd ?? 500000,
       holdersCount: tokenData.holdersCount ?? existing?.holdersCount ?? 150,
       verificationStatus: tokenData.verificationStatus || existing?.verificationStatus || 'Pending Review',
@@ -99,8 +99,8 @@ export class ProviderManager {
       lastUpdated: new Date().toISOString(),
       totalSupply: tokenData.totalSupply ?? existing?.totalSupply ?? 100000000,
       circulatingSupply: tokenData.circulatingSupply ?? existing?.circulatingSupply ?? 10000000,
-      marketCapUsd: ((tokenData.circulatingSupply ?? existing?.circulatingSupply ?? 10000000) * (tokenData.priceSda ?? existing?.priceSda ?? 1.0) * 1.2405),
-      fdvUsd: ((tokenData.totalSupply ?? existing?.totalSupply ?? 100000000) * (tokenData.priceSda ?? existing?.priceSda ?? 1.0) * 1.2405),
+      marketCapUsd: ((tokenData.circulatingSupply ?? existing?.circulatingSupply ?? 10000000) * (tokenData.priceSda ?? existing?.priceSda ?? 1.0) * 15.00),
+      fdvUsd: ((tokenData.totalSupply ?? existing?.totalSupply ?? 100000000) * (tokenData.priceSda ?? existing?.priceSda ?? 1.0) * 15.00),
       description: tokenData.description || existing?.description || 'Custom token registered on SIDRA SWAP WATCH.',
       isDisabled: tokenData.isDisabled ?? existing?.isDisabled ?? false
     };

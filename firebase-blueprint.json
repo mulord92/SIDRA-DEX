@@ -1,0 +1,30 @@
+{
+  "entities": {
+    "userProfiles": {
+      "path": "users/{userId}",
+      "fields": {
+        "uid": "string",
+        "email": "string",
+        "displayName": "string",
+        "photoURL": "string",
+        "createdAt": "timestamp"
+      }
+    },
+    "userWatchlists": {
+      "path": "users/{userId}/watchlist/{symbol}",
+      "fields": {
+        "symbol": "string",
+        "addedAt": "timestamp"
+      }
+    },
+    "userAlerts": {
+      "path": "users/{userId}/alerts/{alertId}",
+      "fields": {
+        "tokenSymbol": "string",
+        "type": "string",
+        "thresholdValue": "number",
+        "createdAt": "timestamp"
+      }
+    }
+  }
+}

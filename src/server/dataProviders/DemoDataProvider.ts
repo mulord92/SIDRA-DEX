@@ -146,11 +146,11 @@ export class DemoDataProvider implements IDataProvider {
       symbol: 'SDA',
       logoUrl: '/tokens/sda.png',
       priceSda: 1.0,
-      priceUsd: 1.2405,
+      priceUsd: 15.00,
       change24h: 0.8,
       volume24hSda: 15400000,
-      volume24hUsd: 19103700,
-      liquidityUsd: 45000000,
+      volume24hUsd: 231000000,
+      liquidityUsd: 450000000,
       holdersCount: 142080,
       verificationStatus: 'Verified',
       contractAddress: '0x0000000000000000000000000000000000000000',
@@ -160,8 +160,8 @@ export class DemoDataProvider implements IDataProvider {
       lastUpdated: new Date().toISOString(),
       totalSupply: 2100000000,
       circulatingSupply: 1420000000,
-      marketCapUsd: 1761510000,
-      fdvUsd: 2605050000,
+      marketCapUsd: 21300000000,
+      fdvUsd: 31500000000,
       description: 'The native gas and utility token powering the SidraChain proof-of-work/proof-of-stake hybrid blockchain.',
       websiteUrl: 'https://sidrachain.com',
       explorerUrl: 'https://ledger.sidrachain.com'
@@ -290,29 +290,70 @@ export class DemoDataProvider implements IDataProvider {
   async getHistoricalData(symbol: string, timeframe: string): Promise<PricePoint[]> {
     const token = await this.getTokenBySymbol(symbol) || this.mockTokens[0];
     const points: PricePoint[] = [];
-    const count = timeframe === '1D' ? 24 : timeframe === '7D' ? 14 : timeframe === '1M' ? 30 : 60;
+    const tfUpper = (timeframe || '1M').toUpperCase();
     const basePrice = token.priceSda;
 
+    let count = 30;
+    let stepMs = 60 * 1000; // Minimum 1 minute (60s) based on ledger.sidrachain.com
+
+    if (tfUpper === '1S' || tfUpper === '5S' || tfUpper === '15S' || tfUpper === '1M' || tfUpper === '1MIN') {
+      count = 30;
+      stepMs = 60 * 1000;
+    } else if (tfUpper === '5M') {
+      count = 30;
+      stepMs = 5 * 60 * 1000;
+    } else if (tfUpper === '15M') {
+      count = 30;
+      stepMs = 15 * 60 * 1000;
+    } else if (tfUpper === '30M') {
+      count = 30;
+      stepMs = 30 * 60 * 1000;
+    } else if (tfUpper === '1H') {
+      count = 24;
+      stepMs = 2.5 * 60 * 1000;
+    } else if (tfUpper === '4H') {
+      count = 24;
+      stepMs = 10 * 60 * 1000;
+    } else if (tfUpper === '1D' || tfUpper === '24H') {
+      count = 24;
+      stepMs = 60 * 60 * 1000;
+    } else if (tfUpper === '7D') {
+      count = 14;
+      stepMs = 12 * 60 * 60 * 1000;
+    } else {
+      count = 30;
+      stepMs = 24 * 60 * 60 * 1000;
+    }
+
+    let runningPrice = basePrice * 0.98;
     for (let i = count; i >= 0; i--) {
-      const randomNoise = (Math.random() - 0.48) * (basePrice * 0.05);
-      const priceSda = Math.max(0.001, basePrice + randomNoise);
-      const priceUsd = priceSda * 1.2405;
-      
-      const now = new Date();
-      if (timeframe === '1D') {
-        now.setHours(now.getHours() - i);
-      } else {
-        now.setDate(now.getDate() - i);
-      }
+      const randomNoise = (Math.random() - 0.48) * (basePrice * 0.02);
+      const closeSda = Math.max(0.001, runningPrice + randomNoise);
+      const openSda = runningPrice;
+      const highSda = Math.max(openSda, closeSda) * (1 + Math.random() * 0.004);
+      const lowSda = Math.min(openSda, closeSda) * (1 - Math.random() * 0.004);
+      runningPrice = closeSda;
+
+      const now = new Date(Date.now() - i * stepMs);
+      const timeLabel = (tfUpper === '1M' || tfUpper === '5M' || tfUpper === '15M' || tfUpper === '30M' || tfUpper === '1H' || tfUpper === '4H' || tfUpper === '1D' || tfUpper === '24H')
+        ? now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : `${now.getMonth() + 1}/${now.getDate()}`;
 
       points.push({
         timestamp: now.toISOString(),
-        timeLabel: timeframe === '1D' 
-          ? `${now.getHours()}:00` 
-          : `${now.getMonth() + 1}/${now.getDate()}`,
-        priceSda: Number(priceSda.toFixed(4)),
-        priceUsd: Number(priceUsd.toFixed(4)),
-        volumeUsd: Math.floor(Math.random() * 500000 + 100000)
+        timeLabel,
+        priceSda: Number(closeSda.toFixed(4)),
+        priceUsd: Number((closeSda * 15.00).toFixed(4)),
+        volumeUsd: Math.floor(Math.random() * 50000 + 10000),
+        openSda: Number(openSda.toFixed(4)),
+        highSda: Number(highSda.toFixed(4)),
+        lowSda: Number(lowSda.toFixed(4)),
+        closeSda: Number(closeSda.toFixed(4)),
+        openUsd: Number((openSda * 15.00).toFixed(4)),
+        highUsd: Number((highSda * 15.00).toFixed(4)),
+        lowUsd: Number((lowSda * 15.00).toFixed(4)),
+        closeUsd: Number((closeSda * 15.00).toFixed(4)),
+        tradesCount: Math.floor(Math.random() * 12 + 1)
       });
     }
 

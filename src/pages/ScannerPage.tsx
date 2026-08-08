@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ScanResult } from '../types/index';
 import { safeFetchJson } from '../utils/api';
 import { DemoDataBadge } from '../components/DemoDataBadge';
+import { CopyAddressButton } from '../components/CopyAddressButton';
 import { Radar, ShieldCheck, CheckCircle2, AlertTriangle, Search, Copy, Check, Sparkles, PieChart, Users, Droplet, Lock } from 'lucide-react';
 
 export const ScannerPage: React.FC = () => {
@@ -145,11 +146,11 @@ export const ScannerPage: React.FC = () => {
                         {result.symbol}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-gray-400 font-mono">
-                      <span>{result.contractAddress.slice(0, 10)}...{result.contractAddress.slice(-8)}</span>
-                      <button onClick={handleCopy} className="hover:text-[#f2ca50]">
-                        {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
+                    <div className="mt-2">
+                      <CopyAddressButton
+                        address={result.contractAddress}
+                        variant="button"
+                      />
                     </div>
                   </div>
                 </div>

@@ -117,9 +117,9 @@ export const AboutPage: React.FC = () => {
           <div className="w-8 h-8 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 flex items-center justify-center font-bold text-xs">
             1
           </div>
-          <h3 className="font-bold text-sm text-white">Demo Data Provider</h3>
+          <h3 className="font-bold text-sm text-white">Sidra Dex Live (Ledger.sidrachain.com)</h3>
           <p className="text-xs text-gray-400 leading-relaxed">
-            Active in development environments. Seeds verified sample tokens with realistic volatility loops for testing.
+            Real-time on-chain synchronization with SidraChain ledger (`ledger.sidrachain.com`) and DEX liquidity pools.
           </p>
         </div>
 
@@ -127,9 +127,9 @@ export const AboutPage: React.FC = () => {
           <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">
             2
           </div>
-          <h3 className="font-bold text-sm text-white">Official Sidra API</h3>
+          <h3 className="font-bold text-sm text-white">Official Sidra API & Nodes</h3>
           <p className="text-xs text-gray-400 leading-relaxed">
-            Directly hooks into official SidraChain API endpoints when live environment credentials are standard.
+            Directly hooks into official SidraChain JSON-RPC nodes (`node.sidrachain.com`) for block headers and slot0 quotes.
           </p>
         </div>
 
@@ -137,7 +137,7 @@ export const AboutPage: React.FC = () => {
           <div className="w-8 h-8 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 flex items-center justify-center font-bold text-xs">
             3
           </div>
-          <h3 className="font-bold text-sm text-white">Indexer Provider</h3>
+          <h3 className="font-bold text-sm text-white">DEX Contract Indexer</h3>
           <p className="text-xs text-gray-400 leading-relaxed">
             Queries decentralized indexers and RPC nodes (`https://node.sidrachain.com`) to parse verified pair contracts and liquidity depth on-chain.
           </p>

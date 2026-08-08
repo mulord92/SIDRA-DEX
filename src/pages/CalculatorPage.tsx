@@ -185,13 +185,21 @@ export const CalculatorPage: React.FC = () => {
         </div>
 
         {/* Exchange Rate & Refresh Info */}
-        <div className="px-2 py-3 flex justify-between items-center border-t border-white/5 mt-1 text-xs text-[#d0c5af]">
+        <div className="px-2 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center border-t border-white/5 mt-1 text-xs text-[#d0c5af] gap-2">
           <div className="flex items-center gap-1.5 font-mono">
             <Info className="w-3.5 h-3.5 text-[#f2ca50]" />
             <span>1 {baseToken} = {estimate ? estimate.exchangeRate : '1.0'} {targetToken}</span>
           </div>
 
-          <span className="text-[11px] text-gray-500">Live DEX Quote</span>
+          <div className="text-[10px] text-yellow-400 font-mono flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+            <span>Peg Reference: 1 SDA = $15.00 USD</span>
+          </div>
+        </div>
+
+        {/* Reference Peg Banner in Calculator */}
+        <div className="p-2.5 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-[10px] text-gray-300 leading-relaxed">
+          <strong className="text-yellow-400 font-mono">Reference Peg:</strong> The system maintains an exchange rate of <strong className="text-white font-mono">1 SDA = $15.00 USD</strong> as the benchmark conversion standard for the Sidra ecosystem (Sample standard for estimating dollar values).
         </div>
 
         {/* Action Button */}

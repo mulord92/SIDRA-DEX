@@ -3,6 +3,8 @@ import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { DisclaimerFooter } from './components/DisclaimerFooter';
 import { AndroidAppModal } from './components/AndroidAppModal';
+import { AuthProvider } from './context/AuthContext';
+import { AuthModal } from './components/AuthModal';
 
 // Pages
 import { DashboardPage } from './pages/DashboardPage';
@@ -14,11 +16,16 @@ import { WatchlistPage } from './pages/WatchlistPage';
 import { AlertsPage } from './pages/AlertsPage';
 import { AboutPage } from './pages/AboutPage';
 import { AdminPage } from './pages/AdminPage';
+import { WhaleTrackerPage } from './pages/WhaleTrackerPage';
+import { PricingPage } from './pages/PricingPage';
+import { DeveloperApiPage } from './pages/DeveloperApiPage';
+import { PricingModal } from './components/PricingModal';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState<string>(window.location.pathname);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [androidModalOpen, setAndroidModalOpen] = useState(false);
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
 
   // Register Service Worker for Android PWA offline support & WebAPK capabilities
   useEffect(() => {
@@ -92,46 +99,64 @@ export default function App() {
     if (currentPath.startsWith('/admin')) {
       return <AdminPage />;
     }
+    if (currentPath.startsWith('/whales')) {
+      return <WhaleTrackerPage />;
+    }
+    if (currentPath.startsWith('/pricing')) {
+      return <PricingPage />;
+    }
+    if (currentPath.startsWith('/developer')) {
+      return <DeveloperApiPage />;
+    }
 
     // Default fallback
     return <DashboardPage />;
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#050b1a] text-white font-sans selection:bg-yellow-500/30 selection:text-yellow-400">
-      {/* Top Header */}
-      <Header
-        onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
-        onOpenAndroidModal={() => setAndroidModalOpen(true)}
-      />
-
-      <div className="flex flex-1 relative">
-        {/* Left Navigation Sidebar */}
-        <Sidebar
-          activePath={currentPath}
-          isOpenMobile={mobileMenuOpen}
-          onCloseMobile={() => setMobileMenuOpen(false)}
+    <AuthProvider>
+      <div className="min-h-screen flex flex-col bg-[#050b1a] text-white font-sans selection:bg-yellow-500/30 selection:text-yellow-400">
+        {/* Top Header */}
+        <Header
+          onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
           onOpenAndroidModal={() => setAndroidModalOpen(true)}
-          onUpgradeClick={() => {
-            window.history.pushState({}, '', '/about');
-            setCurrentPath('/about');
-          }}
+          onUpgradeClick={() => setPricingModalOpen(true)}
         />
 
-        {/* Main Content Area */}
-        <main className="flex-1 md:ml-64 p-4 md:p-8 max-w-7xl mx-auto w-full min-h-[calc(100vh-4rem)] flex flex-col justify-between">
-          <div>{renderCurrentPage()}</div>
+        <div className="flex flex-1 relative">
+          {/* Left Navigation Sidebar */}
+          <Sidebar
+            activePath={currentPath}
+            isOpenMobile={mobileMenuOpen}
+            onCloseMobile={() => setMobileMenuOpen(false)}
+            onOpenAndroidModal={() => setAndroidModalOpen(true)}
+            onUpgradeClick={() => setPricingModalOpen(true)}
+          />
 
-          {/* Persistent Disclaimer Footer */}
-          <DisclaimerFooter />
-        </main>
+          {/* Main Content Area */}
+          <main className="flex-1 md:ml-64 p-4 md:p-8 max-w-7xl mx-auto w-full min-h-[calc(100vh-4rem)] flex flex-col justify-between">
+            <div>{renderCurrentPage()}</div>
+
+            {/* Persistent Disclaimer Footer */}
+            <DisclaimerFooter />
+          </main>
+        </div>
+
+        {/* Android App Launcher Modal */}
+        <AndroidAppModal
+          isOpen={androidModalOpen}
+          onClose={() => setAndroidModalOpen(false)}
+        />
+
+        {/* Interactive Pricing Modal */}
+        <PricingModal
+          isOpen={pricingModalOpen}
+          onClose={() => setPricingModalOpen(false)}
+        />
+
+        {/* Firebase Authentication Modal */}
+        <AuthModal />
       </div>
-
-      {/* Android App Launcher Modal */}
-      <AndroidAppModal
-        isOpen={androidModalOpen}
-        onClose={() => setAndroidModalOpen(false)}
-      />
-    </div>
+    </AuthProvider>
   );
 }

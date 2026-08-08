@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Token } from '../types/index';
 import { safeFetchJson } from '../utils/api';
 import { DemoDataBadge } from '../components/DemoDataBadge';
+import { CopyAddressButton } from '../components/CopyAddressButton';
 import { Eye, Trash2, Bell, ExternalLink, Plus, Search } from 'lucide-react';
 
 export const WatchlistPage: React.FC = () => {
@@ -118,8 +119,8 @@ export const WatchlistPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 font-mono">
-                {tokens.map((token) => (
-                  <tr key={token.id} className="hover:bg-white/5 transition-colors">
+                {tokens.map((token, idx) => (
+                  <tr key={`${token.id || token.symbol}-${idx}`} className="hover:bg-white/5 transition-colors">
                     <td className="py-4 px-6 font-sans">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-[#1d2023] border border-white/10 flex items-center justify-center font-bold text-xs text-[#f2ca50]">
@@ -158,6 +159,9 @@ export const WatchlistPage: React.FC = () => {
 
                     <td className="py-4 px-6 text-right font-sans">
                       <div className="flex items-center justify-end gap-2">
+                        {token.contractAddress && (
+                          <CopyAddressButton address={token.contractAddress} variant="icon" />
+                        )}
                         <a
                           href={`/token/${token.symbol}`}
                           className="p-1.5 text-gray-400 hover:text-[#f2ca50] transition-colors"

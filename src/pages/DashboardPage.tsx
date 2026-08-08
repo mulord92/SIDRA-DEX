@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
 import { Token, MarketGlobalStats } from '../types/index';
 import { safeFetchJson } from '../utils/api';
 import { DemoDataBadge } from '../components/DemoDataBadge';
 import { TokenLogo } from '../components/TokenLogo';
 import { DashboardPriceChart } from '../components/DashboardPriceChart';
-import { TrendingUp, TrendingDown, RefreshCw, Search, ArrowUpRight, ArrowDownRight, Layers, DollarSign, Activity, Droplets, Sparkles, Radio } from 'lucide-react';
+import { CopyAddressButton } from '../components/CopyAddressButton';
+import { TokenCard } from '../components/TokenCard';
+import { SponsoredBanner } from '../components/SponsoredBanner';
+import { PricingModal } from '../components/PricingModal';
+import { SetPriceAlertModal } from '../components/SetPriceAlertModal';
+import { UserPriceAlertsSection } from '../components/UserPriceAlertsSection';
+import { TrendingUp, TrendingDown, RefreshCw, Search, ArrowUpRight, ArrowDownRight, Layers, DollarSign, Activity, Droplets, Sparkles, Radio, Fish, ShieldCheck, Zap, BellRing, BellPlus } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<MarketGlobalStats | null>(null);
@@ -13,6 +20,9 @@ export const DashboardPage: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [lastRefreshed, setLastRefreshed] = useState<string>(new Date().toLocaleTimeString());
+  const [pricingOpen, setPricingOpen] = useState(false);
+  const [setAlertModalOpen, setSetAlertModalOpen] = useState(false);
+  const [alertTargetSymbol, setAlertTargetSymbol] = useState<string>('SDA');
 
   const fetchData = async (silent = false) => {
     if (!silent) setLoading(true);
@@ -42,6 +52,15 @@ export const DashboardPage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const handleOpenAlertModal = (symbol?: string) => {
+    if (symbol) {
+      setAlertTargetSymbol(symbol);
+    } else if (tokens.length > 0) {
+      setAlertTargetSymbol(tokens[0].symbol);
+    }
+    setSetAlertModalOpen(true);
+  };
+
   const topGainers = [...tokens].filter(t => t.change24h > 0).sort((a, b) => b.change24h - a.change24h).slice(0, 5);
   const topLosers = [...tokens].filter(t => t.change24h < 0).sort((a, b) => a.change24h - b.change24h).slice(0, 5);
   const recentlyUpdated = tokens.slice(0, 5);
@@ -59,11 +78,26 @@ export const DashboardPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-xs font-mono text-yellow-400" title="Sample benchmark conversion standard for Sidra ecosystem">
+            <span className="font-bold">Reference Peg:</span>
+            <span className="text-white font-bold">1 SDA = $15.00 USD</span>
+            <span className="text-[10px] text-gray-400 hidden sm:inline">(Sample Rate)</span>
+          </div>
+
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-400">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
             <span>LIVE DEX FEED • {lastRefreshed}</span>
           </div>
+
+          <button
+            onClick={() => handleOpenAlertModal()}
+            className="p-2 rounded-xl bg-gradient-to-r from-yellow-500/20 to-amber-500/20 hover:from-yellow-500/30 hover:to-amber-500/30 text-yellow-400 border border-yellow-500/40 transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm"
+          >
+            <BellPlus className="w-3.5 h-3.5" />
+            <span>Set Price Alert</span>
+          </button>
+
           <button
             onClick={() => fetchData(false)}
             disabled={loading}
@@ -85,7 +119,11 @@ export const DashboardPage: React.FC = () => {
       {/* Global Stats Bar */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
         {/* Tokens Tracked */}
-        <div className="bg-black/40 border border-white/5 rounded-xl p-4 backdrop-blur-md flex flex-col justify-between hover:border-yellow-500/20 transition-all">
+        <motion.div
+          whileHover={{ y: -3 }}
+          transition={{ duration: 0.2 }}
+          className="bg-black/40 border border-white/5 rounded-xl p-4 backdrop-blur-md flex flex-col justify-between hover:border-yellow-500/30 transition-colors"
+        >
           <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-1">
             Tokens Tracked
           </p>
@@ -95,10 +133,14 @@ export const DashboardPage: React.FC = () => {
           <p className="text-[10px] text-emerald-400 flex items-center gap-1 mt-2">
             <Radio className="w-2.5 h-2.5" /> 88 Sidra DEX Pools
           </p>
-        </div>
+        </motion.div>
 
         {/* Total Market Value */}
-        <div className="bg-black/40 border border-white/5 rounded-xl p-4 backdrop-blur-md flex flex-col justify-between hover:border-yellow-500/20 transition-all">
+        <motion.div
+          whileHover={{ y: -3 }}
+          transition={{ duration: 0.2 }}
+          className="bg-black/40 border border-white/5 rounded-xl p-4 backdrop-blur-md flex flex-col justify-between hover:border-yellow-500/30 transition-colors"
+        >
           <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-1">
             Total Market Value
           </p>
@@ -108,10 +150,14 @@ export const DashboardPage: React.FC = () => {
           <p className="text-[10px] text-emerald-400 flex items-center gap-1 mt-2">
             <TrendingUp className="w-3 h-3" /> +2.4% 24h
           </p>
-        </div>
+        </motion.div>
 
         {/* 24h Volume */}
-        <div className="bg-black/40 border border-white/5 rounded-xl p-4 backdrop-blur-md flex flex-col justify-between hover:border-yellow-500/20 transition-all">
+        <motion.div
+          whileHover={{ y: -3 }}
+          transition={{ duration: 0.2 }}
+          className="bg-black/40 border border-white/5 rounded-xl p-4 backdrop-blur-md flex flex-col justify-between hover:border-yellow-500/30 transition-colors"
+        >
           <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-1">
             24h Volume
           </p>
@@ -121,10 +167,14 @@ export const DashboardPage: React.FC = () => {
           <p className="text-[10px] text-emerald-400 flex items-center gap-1 mt-2">
             <Activity className="w-3 h-3" /> Real-Time Volume
           </p>
-        </div>
+        </motion.div>
 
         {/* Total Liquidity */}
-        <div className="bg-black/40 border border-white/5 rounded-xl p-4 backdrop-blur-md flex flex-col justify-between hover:border-yellow-500/20 transition-all">
+        <motion.div
+          whileHover={{ y: -3 }}
+          transition={{ duration: 0.2 }}
+          className="bg-black/40 border border-white/5 rounded-xl p-4 backdrop-blur-md flex flex-col justify-between hover:border-yellow-500/30 transition-colors"
+        >
           <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-1">
             Total Liquidity
           </p>
@@ -134,10 +184,14 @@ export const DashboardPage: React.FC = () => {
           <p className="text-[10px] text-emerald-400 flex items-center gap-1 mt-2">
             <Droplets className="w-3 h-3" /> Locked In Pools
           </p>
-        </div>
+        </motion.div>
 
         {/* Market Sentiment */}
-        <div className="bg-black/40 border border-white/5 rounded-xl p-4 backdrop-blur-md flex flex-col justify-between hover:border-yellow-500/20 transition-all col-span-2 md:col-span-1">
+        <motion.div
+          whileHover={{ y: -3 }}
+          transition={{ duration: 0.2 }}
+          className="bg-black/40 border border-white/5 rounded-xl p-4 backdrop-blur-md flex flex-col justify-between hover:border-yellow-500/30 transition-colors col-span-2 md:col-span-1"
+        >
           <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-1">
             DEX Sentiment
           </p>
@@ -153,11 +207,45 @@ export const DashboardPage: React.FC = () => {
             <div className="w-[78%] h-full bg-emerald-500"></div>
             <div className="w-[22%] h-full bg-red-500"></div>
           </div>
-        </div>
+        </motion.div>
       </div>
+
+      {/* Real-Time User Firestore Price Alerts Section */}
+      <UserPriceAlertsSection
+        tokens={tokens}
+        onOpenSetAlertModal={(symbol) => handleOpenAlertModal(symbol)}
+      />
 
       {/* Real-time Price History Chart Component */}
       <DashboardPriceChart tokens={tokens} />
+
+      {/* Featured Sponsored Token Banner */}
+      <SponsoredBanner onUpgradeClick={() => setPricingOpen(true)} type="featured_token" />
+
+      {/* Featured Token Cards Grid */}
+      {tokens.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-[#e0e2e6] font-['Outfit'] flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#f2ca50]" />
+              Featured Sidra DEX Token Cards
+            </h2>
+            <a href="/markets" className="text-xs text-[#f2ca50] hover:underline font-semibold">
+              Explore All Markets →
+            </a>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {tokens.slice(0, 3).map((token, idx) => (
+              <TokenCard
+                key={`${token.id || token.symbol}-${idx}`}
+                token={token}
+                onSetAlert={(sym) => handleOpenAlertModal(sym)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Main Grid: Top Movers & Search / Recently Updated */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -180,13 +268,12 @@ export const DashboardPage: React.FC = () => {
                 {topGainers.length === 0 ? (
                   <div className="text-xs text-gray-400 py-8 text-center">No gainers in this cycle</div>
                 ) : (
-                  topGainers.map((t) => (
-                    <a
-                      key={t.id}
-                      href={`/token/${t.symbol}`}
-                      className="flex justify-between items-center p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group border border-transparent hover:border-white/5"
+                  topGainers.map((t, idx) => (
+                    <div
+                      key={`${t.id || t.symbol}-gainer-${idx}`}
+                      className="flex justify-between items-center p-3 rounded-xl hover:bg-white/5 transition-colors group border border-transparent hover:border-white/10"
                     >
-                      <div className="flex items-center gap-3">
+                      <a href={`/token/${t.symbol}`} className="flex items-center gap-3 flex-1">
                         <TokenLogo token={t} size="md" />
                         <div>
                           <div className="flex items-center gap-1.5">
@@ -197,17 +284,29 @@ export const DashboardPage: React.FC = () => {
                           </div>
                           <p className="text-xs text-[#d0c5af] font-mono">{t.holdersCount?.toLocaleString() || '1,200'} holders</p>
                         </div>
-                      </div>
+                      </a>
 
-                      <div className="text-right">
-                        <p className="font-mono font-semibold text-sm text-[#e0e2e6]">
-                          {t.priceSda.toFixed(t.priceSda < 0.001 ? 6 : t.priceSda < 0.1 ? 4 : 2)} SDA
-                        </p>
-                        <p className="text-xs font-semibold text-emerald-400">
-                          +{t.change24h}%
-                        </p>
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <p className="font-mono font-semibold text-sm text-[#e0e2e6]">
+                            {t.priceSda.toFixed(t.priceSda < 0.001 ? 6 : t.priceSda < 0.1 ? 4 : 2)} SDA
+                          </p>
+                          <p className="text-xs font-semibold text-emerald-400">
+                            +{t.change24h}%
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleOpenAlertModal(t.symbol)}
+                          className="p-1.5 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 transition-colors"
+                          title={`Set Price Alert for ${t.symbol}`}
+                        >
+                          <BellRing className="w-3.5 h-3.5" />
+                        </button>
+                        {t.contractAddress && (
+                          <CopyAddressButton address={t.contractAddress} variant="icon" />
+                        )}
                       </div>
-                    </a>
+                    </div>
                   ))
                 )}
               </div>
@@ -229,13 +328,12 @@ export const DashboardPage: React.FC = () => {
                 {topLosers.length === 0 ? (
                   <div className="text-xs text-gray-400 py-8 text-center">No losers in this cycle</div>
                 ) : (
-                  topLosers.map((t) => (
-                    <a
-                      key={t.id}
-                      href={`/token/${t.symbol}`}
-                      className="flex justify-between items-center p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group border border-transparent hover:border-white/5"
+                  topLosers.map((t, idx) => (
+                    <div
+                      key={`${t.id || t.symbol}-loser-${idx}`}
+                      className="flex justify-between items-center p-3 rounded-xl hover:bg-white/5 transition-colors group border border-transparent hover:border-white/10"
                     >
-                      <div className="flex items-center gap-3">
+                      <a href={`/token/${t.symbol}`} className="flex items-center gap-3 flex-1">
                         <TokenLogo token={t} size="md" />
                         <div>
                           <div className="flex items-center gap-1.5">
@@ -246,17 +344,29 @@ export const DashboardPage: React.FC = () => {
                           </div>
                           <p className="text-xs text-[#d0c5af] font-mono">{t.holdersCount?.toLocaleString() || '1,200'} holders</p>
                         </div>
-                      </div>
+                      </a>
 
-                      <div className="text-right">
-                        <p className="font-mono font-semibold text-sm text-[#e0e2e6]">
-                          {t.priceSda.toFixed(t.priceSda < 0.001 ? 6 : t.priceSda < 0.1 ? 4 : 2)} SDA
-                        </p>
-                        <p className="text-xs font-semibold text-red-400">
-                          {t.change24h}%
-                        </p>
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <p className="font-mono font-semibold text-sm text-[#e0e2e6]">
+                            {t.priceSda.toFixed(t.priceSda < 0.001 ? 6 : t.priceSda < 0.1 ? 4 : 2)} SDA
+                          </p>
+                          <p className="text-xs font-semibold text-red-400">
+                            {t.change24h}%
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleOpenAlertModal(t.symbol)}
+                          className="p-1.5 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 transition-colors"
+                          title={`Set Price Alert for ${t.symbol}`}
+                        >
+                          <BellRing className="w-3.5 h-3.5" />
+                        </button>
+                        {t.contractAddress && (
+                          <CopyAddressButton address={t.contractAddress} variant="icon" />
+                        )}
                       </div>
-                    </a>
+                    </div>
                   ))
                 )}
               </div>
@@ -297,21 +407,29 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             <div className="flex-1 space-y-2">
-              {recentlyUpdated.map((t) => (
-                <a
-                  key={t.id}
-                  href={`/token/${t.symbol}`}
-                  className="flex justify-between items-center p-2.5 rounded-xl hover:bg-white/5 transition-colors"
+              {recentlyUpdated.map((t, idx) => (
+                <div
+                  key={`${t.id || t.symbol}-recent-${idx}`}
+                  className="flex justify-between items-center p-2.5 rounded-xl hover:bg-white/5 transition-colors group"
                 >
-                  <div className="flex items-center gap-2.5">
+                  <a href={`/token/${t.symbol}`} className="flex items-center gap-2.5 flex-1">
                     <TokenLogo token={t} size="xs" />
-                    <span className="font-bold text-xs text-[#e0e2e6]">{t.symbol}</span>
+                    <span className="font-bold text-xs text-[#e0e2e6] group-hover:text-[#f2ca50] transition-colors">{t.symbol}</span>
                     <span className="text-[10px] text-gray-400">({t.name})</span>
+                  </a>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-semibold text-[#f2ca50]">
+                      {t.priceSda.toFixed(t.priceSda < 0.001 ? 6 : t.priceSda < 0.1 ? 4 : 2)} SDA
+                    </span>
+                    <button
+                      onClick={() => handleOpenAlertModal(t.symbol)}
+                      className="p-1 rounded bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/20 transition-colors"
+                      title={`Set Price Alert for ${t.symbol}`}
+                    >
+                      <BellRing className="w-3 h-3" />
+                    </button>
                   </div>
-                  <span className="text-xs font-mono font-semibold text-[#f2ca50]">
-                    {t.priceSda.toFixed(t.priceSda < 0.001 ? 6 : t.priceSda < 0.1 ? 4 : 2)} SDA
-                  </span>
-                </a>
+                </div>
               ))}
             </div>
           </div>
@@ -340,6 +458,15 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <PricingModal isOpen={pricingOpen} onClose={() => setPricingOpen(false)} />
+
+      <SetPriceAlertModal
+        isOpen={setAlertModalOpen}
+        onClose={() => setSetAlertModalOpen(false)}
+        initialTokenSymbol={alertTargetSymbol}
+        tokens={tokens}
+      />
     </div>
   );
 };
