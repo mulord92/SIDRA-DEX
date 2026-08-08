@@ -11,6 +11,7 @@ import { SponsoredBanner } from '../components/SponsoredBanner';
 import { PricingModal } from '../components/PricingModal';
 import { SetPriceAlertModal } from '../components/SetPriceAlertModal';
 import { UserPriceAlertsSection } from '../components/UserPriceAlertsSection';
+import { MarketSentimentAI } from '../components/MarketSentimentAI';
 import { TrendingUp, TrendingDown, RefreshCw, Search, ArrowUpRight, ArrowDownRight, Layers, DollarSign, Activity, Droplets, Sparkles, Radio, Fish, ShieldCheck, Zap, BellRing, BellPlus } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
@@ -215,6 +216,9 @@ export const DashboardPage: React.FC = () => {
         tokens={tokens}
         onOpenSetAlertModal={(symbol) => handleOpenAlertModal(symbol)}
       />
+
+      {/* Gemini AI Market Sentiment Analysis Component */}
+      <MarketSentimentAI />
 
       {/* Real-time Price History Chart Component */}
       <DashboardPriceChart tokens={tokens} />
