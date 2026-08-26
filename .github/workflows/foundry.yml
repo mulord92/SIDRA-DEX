@@ -1,0 +1,25 @@
+name: Foundry Security Tests
+
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Install dependencies
+        run: |
+          forge install foundry-rs/forge-std --no-commit
+          forge install OpenZeppelin/openzeppelin-contracts --no-commit
+      - name: Build
+        run: forge build
+      - name: Tests
+        run: forge test -vvv
+      - name: Gas snapshot
+        run: forge snapshot
