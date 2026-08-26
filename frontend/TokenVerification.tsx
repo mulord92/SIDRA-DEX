@@ -10,9 +10,11 @@ export interface TokenVerificationProps {
 }
 
 const ABI = [
-  "function getTokenInfo(address) view returns (bool supported,bool paused,uint8 decimals,string symbol)",
+  "function getToken(address) view returns (uint8 status,uint8 decimals,string symbol)",
   "function isSupported(address) view returns (bool)"
 ];
+
+const STATUS: VerificationStatus[] = ["UNKNOWN", "PENDING", "VERIFIED", "PAUSED", "BLACKLISTED"];
 
 export default function TokenVerification({ tokenAddress, registryAddress, rpcUrl, chainId }: TokenVerificationProps) {
   const [status, setStatus] = useState<VerificationStatus>("UNKNOWN");
@@ -29,12 +31,11 @@ export default function TokenVerification({ tokenAddress, registryAddress, rpcUr
         const { ethers } = await import("ethers");
         const provider = new ethers.JsonRpcProvider(rpcUrl, chainId);
         const registry = new ethers.Contract(registryAddress, ABI, provider);
-        const info = await registry.getTokenInfo(tokenAddress);
+        const info = await registry.getToken(tokenAddress);
         if (cancelled) return;
-        setSymbol(info[3]); setDecimals(Number(info[2]));
-        if (info[1]) setStatus("PAUSED");
-        else if (info[0]) setStatus("VERIFIED");
-        else setStatus("UNKNOWN");
+        setStatus(STATUS[Number(info[0])] ?? "UNKNOWN");
+        setDecimals(Number(info[1]));
+        setSymbol(info[2]);
       } catch (e) {
         if (!cancelled) { setStatus("UNKNOWN"); setError(e instanceof Error ? e.message : "Unable to verify token"); }
       }
@@ -57,7 +58,8 @@ export default function TokenVerification({ tokenAddress, registryAddress, rpcUr
     {symbol && <div style={{marginTop:12}}><b>{symbol}</b>{decimals !== null && <span style={{opacity:.65}}> · {decimals} decimals</span>}</div>}
     {status === "VERIFIED" && <p style={{marginBottom:0, color:"#86efac"}}>✓ Officially supported by this DEX registry.</p>}
     {status === "PAUSED" && <p style={{marginBottom:0}}>⚠ Token is registered but currently paused.</p>}
-    {status === "UNKNOWN" && !error && <p style={{marginBottom:0, opacity:.7}}>This token is not in the verified registry. Do not trade or pay with it as an official asset.</p>}
+    {status === "BLACKLISTED" && <p style={{marginBottom:0}}>⛔ Token is explicitly blocked.</p>}
+    {(status === "UNKNOWN" || status === "PENDING") && !error && <p style={{marginBottom:0, opacity:.7}}>This token is not verified for official DEX use.</p>}
     {error && <p style={{marginBottom:0}}>{error}</p>}
   </div>;
 }
