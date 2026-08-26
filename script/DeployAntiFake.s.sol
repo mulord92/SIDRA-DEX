@@ -14,7 +14,7 @@ contract DeployAntiFake is Script {
 
         vm.startBroadcast(deployerKey);
         registry = new TokenRegistry(deployer);
-        pairs = new PairRegistry(deployer);
+        pairs = new PairRegistry(deployer, address(registry));
         router = new VerifiedSwapRouter(address(registry), address(pairs));
         payments = new PaymentProcessor(address(registry));
         vm.stopBroadcast();
